@@ -1,0 +1,221 @@
+{% extends "ui_base.html" %}
+{% load static %}
+{% load i18n %}
+{% load rest_framework %}
+
+{% block title %}Portunus API{% endblock %}
+
+{% block head_extra %}
+  <style>
+    .button-container {
+        float:right;
+        padding:5px;
+        border:1px solid grey;
+        border-radius: 5px;
+        margin-bottom: 5px;
+        width:100%;
+    }
+    .api-upper-banner {
+      background-color: #2f3336;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <div class="container-fluid">
+    {% block breadcrumbs %}
+    {% endblock %}
+
+    <!-- Content -->
+    <div id="content">
+
+      <div class="row api-upper-banner">
+        <div class="p-2 col-sm-12 col-md-8 col-lg-10">
+          <h3>
+            {{ name }}
+            <small class="text-muted">
+              {% block description %}
+                {{ description }}
+              {% endblock %}
+            </small>
+          </h3>
+        </div>
+        <div class="col-sm-12 col-md-4 col-lg-2 align-bottom">
+
+          <div class="mt-2" aria-label="API object functions">
+            {% if style != 'list' %}
+              <button type="button" class="btn btn-block btn-secondary"
+                onclick="history.back()">
+                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Back
+              </button>
+            {% endif %}
+
+            {% if post_form %}
+              <button type="button" class="btn btn-block btn-primary" data-toggle="modal" data-target="#createModal">
+                <span class="material-icons md-18">create</span> Create
+              </button>
+            {% endif %}
+
+            {% if put_form %}
+              <button type="button" class="btn btn-block btn-primary" data-toggle="modal" data-target="#editModal">
+                <span class="material-icons md-18">edit</span> Edit
+              </button>
+            {% endif %}
+
+            {% if delete_form %}
+              <form class="button-form" action="{{ request.get_full_path }}" data-method="DELETE">
+                <button class="btn btn-block btn-danger">
+                  <span class="material-icons md-18">delete</span> Delete
+                </button>
+              </form>
+            {% endif %}
+
+            {% if extra_actions %}
+              <div class="dropdown">
+                <button class="btn btn-block btn-primary dropdown-toggle" id="extra-actions-menu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">                  {% trans "API Actions" %}
+                  <span class="material-icons md-18">miscellaneous_services</span>
+                </button>
+                <div class="dropdown-menu" aria-labelledby="extra-actions-menu">
+                  {% for action_name, url in extra_actions|items %}
+                    <a class="dropdown-item" href="{{ url }}">{{ action_name }}</a>
+                  {% endfor %}
+                </div>
+              </div>
+            {% endif %}
+
+            {% if filter_form %}
+              <button style="float: right; margin-right: 10px" data-toggle="modal" data-target="#filtersModal" class="btn btn-default">
+                  <span class="material-icons md-18">filter_alt</span>
+                {% trans "Filters" %}
+              </button>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="content-main">
+
+        {% if paginator %}
+          <nav style="float: right">
+            {% get_pagination_html paginator %}
+          </nav>
+        {% endif %}
+
+        <div class="request-info" style="clear: both" >
+          {% if style == 'list' %}
+            {% include "rest_framework/admin/list.html" %}
+          {% else %}
+            {% include "rest_framework/admin/detail.html" %}
+          {% endif %}
+        </div>
+
+        {% if paginator %}
+          <nav style="float: right">
+            {% get_pagination_html paginator %}
+          </nav>
+        {% endif %}
+      </div>
+    </div>
+  <!-- END Content -->
+</div><!-- /.container -->
+
+<!-- Create Modal -->
+<div class="modal fade" id="createModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Create</h4>
+      </div>
+      <form action="{{ request.get_full_path }}" method="POST" enctype="multipart/form-data" class="form-horizontal" novalidate>
+        <div class="modal-body">
+          <fieldset>
+            {% csrf_token %}
+            {{ post_form }}
+          </fieldset>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Edit</h4>
+      </div>
+      <form action="{{ request.get_full_path }}" data-method="PUT" enctype="multipart/form-data" class="form-horizontal" novalidate>
+        <div class="modal-body">
+          <fieldset>
+            {{ put_form }}
+          </fieldset>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% if error_form %}
+  <!-- Errors Modal -->
+  <div class="modal" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="myModalLabel">{{ error_title }}</h4>
+        </div>
+        <form action="{{ request.get_full_path }}" data-method="{{ request.method }}" enctype="multipart/form-data" class="form-horizontal" novalidate>
+          <div class="modal-body">
+            <fieldset>
+              {{ error_form }}
+            </fieldset>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+{% if filter_form %}
+  {{ filter_form }}
+{% endif %}
+
+{% block script %}
+  <script>
+    window.drf = {
+      csrfHeaderName: "{{ csrf_header_name|default:'X-CSRFToken' }}",
+      csrfToken: "{{ csrf_token }}"
+    };
+  </script>
+  <script src="{% static "rest_framework/js/ajax-form.js" %}"></script>
+  <script src="{% static "rest_framework/js/csrf.js" %}"></script>
+  <script src="{% static "rest_framework/js/prettify-min.js" %}"></script>
+  <script src="{% static "rest_framework/js/default.js" %}"></script>
+  <script type="text/javascript" src="{% static 'datatables/datatables.min.js' %}"></script>
+  <script src="https://cdn.datatables.net/plug-ins/1.10.20/dataRender/percentageBars.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function(event) {
+      $('form').ajaxForm();
+      if (typeof make_datatable === "function") {
+          make_datatable();
+      }
+    });
+  </script>
+{% endblock %}
+
+{% endblock %}

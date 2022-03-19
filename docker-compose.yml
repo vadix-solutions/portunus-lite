@@ -1,0 +1,179 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:9.6.5
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    healthcheck:
+      test: "pg_isready -h localhost -p 5432 -q -U postgres"
+      interval: 3s
+      timeout: 5s
+      retries: 5
+
+  nginx:
+    image: nginx:1.15.0
+    depends_on:
+      - django_wsgi
+    ports:
+      - "20080:80"
+      - "20443:443"
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+      - ./src/staticfiles:/static
+      - ./docs/build/html:/docs
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+
+  django_wsgi:
+    build: .
+    image: vdx_identify:core
+    command: uwsgi --log-master --http=0.0.0.0:19000 -b 32768 --module=vdx_id.wsgi:application --py-autoreload=1
+    volumes:
+      - ./src:/opt/vdx_id
+      - ./vdx_id_data:/data
+    environment:
+      VAULT_TOKEN: $VAULT_TOKEN
+      REDIS_HOST: redis_int
+      REDIS_PORT: 16379
+    depends_on:
+      - db
+      - redis_int
+    expose:
+      - 19000
+
+  django_asgi:
+    container_name: django_asgi
+    image: vdx_identify:core
+    build: .
+    command: daphne -b 0.0.0.0 -p 19001 vdx_id.asgi:application
+    volumes:
+      - ./src:/opt/vdx_id
+      - ./vdx_id_data:/data
+    environment:
+      REDIS_HOST: redis_int
+      REDIS_PORT: 16379
+    depends_on:
+      - db
+      - redis_int
+    expose:
+      - 19001
+
+  flower:
+    image: mher/flower:0.9.5
+    environment:
+      - CELERY_BROKER_URL=redis://redis_int:16379/1
+      - FLOWER_PORT=8888
+    ports:
+      - 18888:8888
+    command: >
+      --url_prefix=flower
+
+  celery:
+    build: .
+    image: vdx_identify:core
+    command: >
+      watchmedo auto-restart --recursive -d . -p '*.py' --
+      celery -A vdx_id worker -l DEBUG -O fair
+      -Q platform,global,collection_read -E -n internal_worker@%h
+    environment:
+      REDIS_HOST: redis_int
+      REDIS_PORT: 16379
+      VAULT_TOKEN: $VAULT_TOKEN
+    volumes:
+      - ./src:/opt/vdx_id
+      - ./vdx_id_data:/data
+    depends_on:
+      - db
+
+  celery-beat:
+    build: .
+    image: vdx_identify:core
+    environment:
+      REDIS_HOST: redis_int
+      REDIS_PORT: 16379
+      LOGLEVEL: DEBUG
+    command: >
+      bash celery_beat.sh
+    volumes:
+      - ./src:/opt/vdx_id
+      - ./vdx_id_data:/data
+    depends_on:
+      - db
+
+  celery-monitor:
+    build: .
+    image: vdx_identify:core
+    environment:
+      REDIS_HOST: redis_int
+      REDIS_PORT: 16379
+      LOGLEVEL: DEBUG
+    command: >
+      python3 celery_monitor.py
+    volumes:
+      - ./src:/opt/vdx_id
+      - ./vdx_id_data:/data
+    depends_on:
+      - db
+
+  agent_int:
+    build:
+      context: .
+      dockerfile: Dockerfile-agent
+    image: vdx_identify:agent
+    environment:
+      REDIS_HOST: redis_int
+      REDIS_PORT: 16379
+      LOGLEVEL: WARN
+      AGENT_QUEUE: agent_internal
+    command: >
+      watchmedo auto-restart --recursive -d . -p '*.py' --
+      bash vdx_id_agent/celery_agent.sh
+    volumes:
+      - ./data/accounts.csv:/data/accounts.csv
+      - ./vdx_id_agent:/opt/vdx_id_agent
+      - ./agent_keys/internal:/data/agent_keys
+
+  vault:
+    image: vault:latest
+    volumes:
+      - ./vault/config:/vault/config
+      - ./vault/policies:/vault/policies
+      - ./vault/data:/vault/data
+    ports:
+      - 18200:18200
+    environment:
+      - VAULT_ADDR=http://0.0.0.0:8200
+      - VAULT_API_ADDR=http://0.0.0.0:8200
+      - VAULT_ADDRESS=http://0.0.0.0:8200
+    cap_add:
+      - IPC_LOCK
+    command: vault server -config=/vault/config/vault.json
+
+  redis_int:
+    image: redis:6.0.12
+    ports:
+      - 16379:16379
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+      - redis_int_data:/data
+    command: redis-server /usr/local/etc/redis/redis.conf
+
+volumes:
+  postgres_data:
+  redis_int_data:
+  redis_insight_volume_data:
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

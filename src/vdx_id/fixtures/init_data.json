@@ -1,0 +1,254 @@
+[
+  {
+    "model": "vdx_id.vdxiduser",
+    "pk": 1,
+    "fields": {
+      "password": "pbkdf2_sha256$150000$qjdndd1mrYgE$/0OzFFfh0iPbLptPZf9eQPwoukos1/U21cEsYQTIFvQ=",
+      "last_login": "2021-10-22T10:47:37Z",
+      "is_superuser": true,
+      "username": "admin",
+      "email": "",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2021-10-22T10:47:20Z",
+      "first_name": "",
+      "last_name": "",
+      "manager": null,
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "id_infra.viaccessdomain",
+    "pk": 1,
+    "fields": {
+      "name": "Unix AccessDomain",
+      "description": "Sample Infrastructure Group for Unix servers",
+      "interface": 6,
+      "owner_id": 1,
+      "passwords_last_rotated": "2022-01-01T00:00Z",
+      "properties": {
+      },
+      "capabilities": {
+        "DEFAULT": {
+          "ssh_user": "root",
+          "use_sudo": true,
+          "host_string": "{server.address}",
+          "ssh_password": "root"
+        },
+        "access_domain": {
+          "collect": {
+            "collect_access": {
+              "server_pk": "{server.pk}"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "model": "id_infra.viaccessdomain",
+    "pk": 2,
+    "fields": {
+      "name": "CSV User Source",
+      "description": "CSV user source test",
+      "interface": 8,
+      "owner_id": 1,
+      "properties": {
+        "use_sudo": false,
+        "csv_fname_accounts": "/data/accounts.csv",
+        "account_identifier_column": "account_name"
+      },
+      "capabilities": {
+        "DEFAULT": {},
+        "access_domain": {
+          "collect": {
+            "collect_access": {
+              "server_pk": "{server.pk}"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "model": "id_infra.viagent",
+    "pk": 1,
+    "fields": {
+      "active": true,
+      "agent_name": "agent_internal",
+      "description": "Internal agent",
+      "public_key": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxZzTIrxOUg7xM68gIjoK\nijZ3XbRw3fzKO2JLS8gK2LMTLiFZCj4oBB2X0am5XwyXQMGodiUQnDdx/tmJGk+1\nUWQxBLFY2tcu3lmbV480t125ww9KppHEza5A4HG4UfBYlCK3aB4qwoDn3Wh393rz\n926lMzgXz7E5cHDlhOTIzO99iFiiypiE5cjCtYTtcPJJA1YUSU+VEOMONb5In6pQ\npCOulTu6svpxqUwF+m3aM5gDsIkT4hv0THF+ch7pCzGjL8QRSKolHRcTeVLmYGiS\nX0mKNyv6xYpK86ydlioCTx3yP4p6cPcEkecFJBnN1vMaBWcCXtkvYb+6zQZjVfKy\nVwIDAQAB\n-----END PUBLIC KEY-----",
+      "queue_name_override": null
+    }
+  },
+  {
+    "model": "id_infra.viagentinterface",
+    "pk": 6,
+    "fields": {
+      "interface_id": "VDX.Unix.v1",
+      "code_fingerprint": "28e428567d7c9309694d1272b918458c",
+      "task_signature": "interface_action",
+      "api": {
+        "CONNECTION": {
+          "optional": [
+            "use_sudo"
+          ],
+          "required": [
+            "host_string",
+            "ssh_user",
+            "ssh_password"
+          ],
+          "signature": "interface_action"
+        },
+        "set_password": {
+          "optional": [],
+          "required": [
+            "username",
+            "password"
+          ]
+        },
+        "add_membership": {
+          "optional": [],
+          "required": [
+            "username",
+            "groupname"
+          ]
+        },
+        "collect_access": {
+          "optional": [],
+          "required": [
+            "collection_id",
+            "server_pk"
+          ]
+        },
+        "create_account": {
+          "optional": [
+            "home",
+            "UID",
+            "GID",
+            "comment"
+          ],
+          "required": [
+            "username"
+          ]
+        },
+        "delete_account": {
+          "optional": [],
+          "required": [
+            "username"
+          ]
+        },
+        "lock_account": {
+          "optional": [],
+          "required": [
+            "username"
+          ]
+        },
+        "unlock_account": {
+          "optional": [],
+          "required": [
+            "username"
+          ]
+        },
+        "CODE_FINGERPRINT": "28e428567d7c9309694d1272b918458c",
+        "remove_membership": {
+          "optional": [],
+          "required": [
+            "groupname",
+            "username"
+          ]
+        }
+      },
+      "default_capabilities": {
+        "DEFAULT": {
+          "ssh_user": "root",
+          "use_sudo": true,
+          "host_string": "{server.address}",
+          "ssh_password": "root"
+        },
+        "access_domain": {
+          "collect": {
+            "collect_access": {
+              "server_pk": "{server.pk}"
+            }
+          }
+        }
+      },
+      "date_created": "2021-10-22T11:07:46.460Z",
+      "date_updated": "2021-11-16T14:31:34.250Z",
+      "agents": [
+        1
+      ]
+    }
+  },
+  {
+    "model": "id_infra.viagentinterface",
+    "pk": 8,
+    "fields": {
+      "interface_id": "csv_local",
+      "code_fingerprint": "58d54a1250e44bc268e50d3e332f3c66",
+      "task_signature": "interface_action",
+      "api": {
+        "CONNECTION": {
+          "optional": [
+            "use_sudo"
+          ],
+          "required": [],
+          "signature": "interface_action"
+        },
+        "collect_access": {
+          "optional": [
+            "csv_fname_accounts",
+            "csv_fname_access",
+            "account_identifier_column",
+            "access_identifier_column",
+            "access_membership_column"
+          ],
+          "required": [
+            "collection_id",
+            "server_pk"
+          ]
+        },
+        "CODE_FINGERPRINT": "58d54a1250e44bc268e50d3e332f3c66"
+      },
+      "default_capabilities": {
+        "DEFAULT": {},
+        "access_domain": {
+          "collect": {
+            "collect_access": {
+              "server_pk": "{server.pk}"
+            }
+          }
+        }
+      },
+      "date_created": "2021-10-22T11:07:46.478Z",
+      "date_updated": "2021-11-17T20:36:27.642Z",
+      "agents": [
+        1
+      ]
+    }
+  },
+  {
+    "model": "id_infra.hostscandefinition",
+    "pk": 1,
+    "fields": {
+      "name": "Unix Containers",
+      "description": "Unix Containers",
+      "scan_definition": {
+        "ports": [
+          22
+        ],
+        "ranges": [
+          {
+            "cidr": "172.20.0.0/24"
+          }
+        ]
+      },
+      "scan_results": {},
+      "scanning_agent": 1,
+      "access_domain": 1,
+      "updated": "2021-10-22T14:36:16.406Z"
+    }
+  }
+]

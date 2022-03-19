@@ -1,0 +1,41 @@
+{% extends "web_ui/acm_base.html" %}
+{% load i18n staticfiles %}
+
+{% block head_extra %}
+  <link rel="stylesheet" href="{% static 'vdx_id/css/home.css' %}">
+{% endblock %}
+
+{% block content %}
+  <div class="d-flex flex-column flex-grow-1">
+
+    Dashboard Coming!
+
+  </div>
+
+  {% verbatim handle_bar_templates %}
+    <style>
+      .swal2-popup {
+        height: 100%;
+      }
+    </style>
+
+{% endverbatim handle_bar_templates %}
+
+{% endblock %}
+
+{% block script %}
+  <script src="{% static 'chart.js/Chart.min.js' %}"></script>
+
+    {{grps_processing|json_script:"grps-processing-data"}}
+
+    <script type="text/javascript">
+      $(function () {
+        Handlebars.registerHelper('contains', function(needle, haystack, options) {
+            needle = Handlebars.escapeExpression(needle);
+            haystack = Handlebars.escapeExpression(haystack);
+            return (haystack.indexOf(needle) > -1) ? options.fn(this) : options.inverse(this);
+        });
+
+      });
+    </script>
+{% endblock %}

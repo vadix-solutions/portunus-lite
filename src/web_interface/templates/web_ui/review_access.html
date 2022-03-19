@@ -1,0 +1,208 @@
+{% extends "web_ui/acm_base.html" %}
+{% load i18n staticfiles %}
+
+{% block head_extra %}
+<link rel="stylesheet" href="{% static 'vdx_id/css/home.css' %}">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/dataTables.bootstrap4.min.css">
+
+{% endblock %}
+
+{% block content %}
+<div class="flex-grow-1 h-100">
+
+    <div class="row p-2 header-top">
+        <div class="col-10">
+            <h4 class="text-primary">Manage Access
+                <small class="text-muted">Manage your access across Portunus</small>
+            </h4>
+        </div>
+        <div class="col-2">
+            <a href="#" class="btn btn-info pull-right">Help</a>
+        </div>
+
+        <div class="col-12">
+            <div class="row">
+                <div class="col-lg-4 text-center mt-2">
+                    {% if request.user.access_synchronized %}
+                        <h4 class="text-success">Access Synchronized</span></h4>
+                    {% else %}
+                        <h4 class="text-warning">Access Updating</span></h4>
+                    {% endif %}
+                </div>
+                <div class="col-lg-8 text-center mt-2">
+                    <div class="btn-group" role="group" aria-label="Basic example">
+                        <button type="button" class="btn btn-primary">Your Access</button>
+                        <button type="button" class="btn btn-secondary disabled">Create Access Request</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row access-body flex-grow-1 h-100">
+        <div class="col-12 col-lg-8 col-xl-8">
+            <table id="user_access_table" class="table table-hover table-sm">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>{% trans "Access Item" %}</th>
+                        <th>{% trans "Access Account" %}</th>
+                        <th>{% trans "Access Domain" %}</th>
+                        <th>{% trans "Membership State" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th>{% trans "Access Item" %}</th>
+                        <th>{% trans "Access Account" %}</th>
+                        <th>{% trans "Access Domain" %}</th>
+                        <th>{% trans "Membership State" %}</th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        <div class="col-12 col-lg-4 col-xl-4">
+            {% include "web_ui/access_graph.html" %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+
+{% block script %}
+
+{% verbatim handle_bar_templates %}
+
+{% endverbatim handle_bar_templates %}
+
+<script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.21/js/dataTables.bootstrap4.min.js"></script>
+
+<script>
+    var user_access_table;
+
+    $(document).ready(function () {
+        create_user_access_table();
+
+        // TODO: Come back to this and hook table reloads to specific Access-related websocket messages
+        setInterval(function () {
+            // user paging is not reset on reload
+            user_access_table.ajax.reload(null, false);
+        }, 5000);
+
+    });
+
+    const swalWithBootstrapButtons = Swal.mixin({
+        width: "600px",
+        customClass: {
+            confirmButton: 'btn btn-success',
+            cancelButton: 'btn btn-danger'
+        },
+        buttonsStyling: false
+    })
+
+    function setup_tfoot_search(dtable, search_dom) {
+        search_dom.each(function (i) {
+            var title = $(this).text();
+
+            if ($(this).hasClass('table_select') == true) {
+                var select = $('<select class="form-control"><option value=""></option></select>')
+                    .appendTo($(this).empty())
+                    .on('change', function () {
+                        var val = $(this).val();
+
+                        dtable.column(i)
+                            .search(val ? $(this).val() : val, true, false)
+                            .draw();
+                    });
+                dtable.column(i).data().unique().sort().each(function (d, j) {
+                    select.append('<option value="' + d + '">' + d + '</option>');
+                });
+            } else if (title.length > 0) {
+                $(this).html(
+                    '<input class="form-control" type="text" placeholder="Search ' + title + '" />');
+            }
+        });
+
+        dtable.columns().every(function () {
+            var that = this;
+            $('input', this.footer()).on('keyup change', function () {
+                if (that.search() !== this.value) {
+                    that.search(this.value, true).draw();
+                }
+            });
+        });
+    }
+
+    function create_user_access_table() {
+
+        $('#user_access_table').on('click', 'tbody tr', function () {
+            var data = user_access_table.row( $(this) ).data()
+            cy.elements('node[label = "' + data.access_id + '"]').flashClass('selected', 5000);
+        });
+
+        $('#user_access_table tfoot th').each(function () {
+            var title = $(this).text();
+            if (title.length > 0) {
+                $(this).html(
+                    '<input class="form-control" type="text" placeholder="Search ' + title + '" />');
+            }
+        });
+
+        user_access_table = $('#user_access_table').DataTable({
+            "autoWidth": false,
+            "pageLength": 10,
+            "order": [
+                [0, "desc"],
+                [1, "desc"]
+            ],
+            "ajax": {
+                url: "{% url 'api:id_rbac:user-items-memberships-list' parent_lookup_account__user=user.pk %}",
+                dataSrc: ""
+            },
+            rowCallback: function( row, data, index ) {
+                if (data["provision_state"] == "Deprovisioned") {
+                    $(row).hide();
+                }
+            },
+            "columns": [
+                {
+                    "data": "access",
+                    "render": function (data, type, row) {
+                        return `<span class="badge badge-outline-primary d-block">${data}</span>`
+                    }
+                },
+                {
+                    "data": "account",
+                    "render": function (data, type, row) {
+                        return `<span class="badge badge-outline-secondary d-block">${data}</span>`
+                    }
+                },
+                {
+                    "data": "access_domain",
+                },
+                {
+                    "data": "provision_state",
+                    "render": function (data, type, row) {
+                        if (data == "Provisioned"){
+                            return `<span class="text-success d-block">${data}</span>`
+                        } else {
+                            return `<span class="text-secondary d-block">${data}</span>`
+                        }
+
+                    }
+                }
+            ],
+            "responsive": true,
+            "initComplete": function (settings, json) {
+                setup_tfoot_search(user_access_table, $('#user_access_table tfoot th'));
+                // highlight_graph_hook();
+            },
+        });
+    }
+
+</script>
+{% endblock %}

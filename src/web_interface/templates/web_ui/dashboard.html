@@ -1,0 +1,339 @@
+{% extends "web_ui/acm_base.html" %}
+{% load i18n staticfiles %}
+
+{% block head_extra %}
+<link rel="stylesheet" href="{% static 'vdx_id/css/home.css' %}">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/dataTables.bootstrap4.min.css">
+
+{% endblock %}
+
+{% block content %}
+<div class="flex-grow-1 h-100 p-4">
+
+    <div class="row">
+        <div class="col-12 grid-margin">
+          <div class="card card-statistics">
+            <div class="row">
+              <div class="card-col col-xl-3 col-lg-3 col-md-3 col-6">
+                <div class="card-body">
+                  <div class="d-flex align-items-center justify-content-center flex-column flex-sm-row">
+                    <i class="mdi mdi-account-multiple-outline text-primary mr-0 mr-sm-4 icon-lg"></i>
+                    <div class="wrapper text-center text-sm-left">
+                      <p class="card-text mb-0">Accounts</p>
+                      <div class="fluid-container">
+                        <h3 class="mb-0 font-weight-medium">{{ stats.access_accounts }}</h3>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="card-col col-xl-3 col-lg-3 col-md-3 col-6">
+                <div class="card-body">
+                  <div class="d-flex align-items-center justify-content-center flex-column flex-sm-row">
+                    <i class="mdi mdi-checkbox-marked-circle-outline text-primary mr-0 mr-sm-4 icon-lg"></i>
+                    <div class="wrapper text-center text-sm-left">
+                      <p class="card-text mb-0">Entitlements</p>
+                      <div class="fluid-container">
+                        <h3 class="mb-0 font-weight-medium">{{ stats.access_items }}</h3>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="card-col col-xl-3 col-lg-3 col-md-3 col-6">
+                <div class="card-body">
+                  <div class="d-flex align-items-center justify-content-center flex-column flex-sm-row">
+                    <i class="mdi mdi-trophy-outline text-primary mr-0 mr-sm-4 icon-lg"></i>
+                    <div class="wrapper text-center text-sm-left">
+                      <p class="card-text mb-0">Memberships</p>
+                      <div class="fluid-container">
+                        <h3 class="mb-0 font-weight-medium">{{ stats.access_memberships }}</h3>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="card-col col-xl-3 col-lg-3 col-md-3 col-6">
+                <div class="card-body">
+                  <div class="d-flex align-items-center justify-content-center flex-column flex-sm-row">
+                    <i class="mdi mdi-target text-primary mr-0 mr-sm-4 icon-lg"></i>
+                    <div class="wrapper text-center text-sm-left">
+                      <p class="card-text mb-0">Agent Tasks</p>
+                      <div class="fluid-container">
+                        <h3 class="mb-0 font-weight-medium">{{ stats.api_tasks }}</h3>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 col-lg-4 grid-margin stretch-card">
+            <div class="card text-center">
+              <div class="card-body d-flex flex-column">
+                <div class="wrapper">
+                  <img src="{{gravatar_url}}" class="img-lg rounded-circle mb-2" alt="profile image">
+
+                  <h4>{{request.user.first_name}} {{request.user.last_name}} ({{request.user.username}})</h4>
+
+                  {% if request.user.is_superuser %}
+                    <p class="text-warning">Super Admin</p>
+                  {% elif request.user.is_staff %}
+                    <p class="text-warning">Staff</p>
+                  {% else %}
+                    <p class="text-muted">User</p>
+                  {% endif %}
+
+                  <p class="card-text">
+                    {% if request.user.access_synchronized %}
+                      <h5 class="text-success">Access Synchronized</h5>
+                    {% else %}
+                      <h5 class="text-warning">Access Updating</h5>
+                    {% endif %}
+                  </p>
+
+                  <a class="btn btn-success btn-sm mb-2"
+                      href="/explore_access">Create New Access Request</a>
+
+                </div>
+                <div class="row border-top pt-3 mt-auto">
+                  <div class="col-4">
+                    <h6 class="font-weight-medium">{{request.user.accounts.count}}</h6>
+                    <p>Accounts</p>
+                  </div>
+                  <div class="col-4">
+                    <h6 class="font-weight-medium">{{request.user.accessrolemembership_set.count}}</h6>
+                    <p>Roles</p>
+                  </div>
+                  <div class="col-4">
+                    <h6 class="font-weight-medium">{{request.user.rule_approvals_for_review.count}}</h6>
+                    <p>Reviews</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        <div class="col-md-6 col-lg-8 grid-margin stretch-card">
+          <div class="card">
+            <div class="card-body">
+
+                <ul class="nav nav-pills mb-1" id="accdom-{{accdom.pk}}-tab" role="tablist">
+
+                    <li class="nav-item">
+                        <a class="nav-link active" id="access-request-list-tab"
+                        data-toggle="tab" href="#access-request-list" role="tab"
+                        aria-controls="access-request-list" aria-selected="true">Role Requests</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="access-role-list-tab" data-toggle="tab" href="#access-role-list"
+                        role="tab" aria-controls="access-role-list" aria-selected="false">Role Memberships</a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link" id="access-breakdown-tab" data-toggle="tab" href="#access-breakdown"
+                      role="tab" aria-controls="access-breakdown" aria-selected="false">Provisioned Access</a>
+                    </li>
+
+                </ul>
+                <hr/>
+                <div class="tab-content overflow-auto" style="max-height: 320px;">
+
+                    <div class="tab-pane fade show active" id="access-request-list" role="tabpanel" aria-labelledby="access-request-list-tab">
+                      {% for req in access_requests %}
+                      <div class="event border-bottom py-1">
+                        <p class="mb-0 mt-0 pt-0 pb-0">
+                          <span class="text-primary"><strong>
+                            {{req.role.name}}</strong>
+                          </span>
+                          <span class="text-info font-weight-medium">
+                            ({{req.role.access_domain}})
+                          </span>
+                          <span><small class="float-right text-muted ml-2">
+                            Last Updated: {{req.last_updated}}</small></span>
+                        </p>
+                        <div class="align-items-center">
+                          <p class="ml-2 mb-0 p-1">
+                            Policies ({{req.ruleapproval_set.count}}):
+                            {% for rappr in req.ruleapproval_set.all %}
+                              <span class="badge badge-light small">{{rappr.rule.name}}</span>
+                            {% endfor %}
+
+                            <a
+                              class="float-right btn btn-primary ml-1"
+                              style="line-height:0.5;"
+                              href="{% url 'api:id_rbac:role_membership_request-list' %}{{req.pk}}">
+                              Open</a>
+                            {% if req.approved %}
+                              <span class="float-right text-success">Approved</span>
+                            {% else %}
+                              <span class="float-right text-warning">Pending Approval</span>
+                            {% endif %}
+                          </p>
+                        </div>
+                      </div>
+                      {% endfor %}
+                    </div>
+
+                    <div class="tab-pane fade" id="access-role-list" role="tabpanel" aria-labelledby="access-role-list">
+                      {% for role_mem in request.user.accessrolemembership_set.all %}
+                      <div class="event border-bottom py-1">
+                        <p class="mb-0 mt-0 pt-0 pb-0">
+                          <span class="text-primary"><strong>
+                            {{role_mem.role.name}}</strong>
+                          </span>
+                          <span class="text-info font-weight-medium">
+                            ({{role_mem.role.access_domain}})
+                          </span>
+                          <span><small class="float-right text-muted ml-2">
+                            Last Updated: {{role_mem.last_updated}}</small></span>
+                        </p>
+                        <div class="align-items-center">
+                          <p class="ml-2 mb-0 p-1">
+                            <button
+                              type="button" class="btn btn-sm btn-secondary p-1"
+                              {% if role_mem.role.access_roles.exists %}
+                                data-toggle="tooltip" data-html="true" data-trigger="click" data-placement='right'
+                                title="<ul class='list-unstyled'>{% for r in role_mem.role.access_roles.all %}<li>{{r.name}}</li>{% endfor %}</ul>"
+                              {% else %}
+                                disabled
+                              {% endif %}
+                              >
+                              Roles <span class="badge badge-primary">
+                                {{role_mem.role.access_roles.count}}
+                              </span>
+                            </button>
+
+                            <button
+                              type="button" class="btn btn-sm btn-secondary p-1"
+                              {% if role_mem.role.access_items.exists %}
+                                data-toggle="tooltip" data-html="true" data-trigger="click" data-placement='right'
+                                title="<ul class='list-unstyled'>{% for i in role_mem.role.access_items.all %}<li>{{i.name}}</li>{% endfor %}</ul>"
+                              {% else %}
+                                disabled
+                              {% endif %}
+                              >
+                              Items <span class="badge badge-primary">
+                                {{role_mem.role.access_items.count}}
+                              </span>
+                            </button>
+
+                            <a
+                              class="float-right btn btn-primary ml-1"
+                              style="line-height:0.5;"
+                              href="{% url 'api:id_rbac:role_membership-list' %}{{role_mem.pk}}">
+                              Open</a>
+                            {% if role_mem.explicit %}
+                              <span class="text-success float-right"
+                              data-toggle="tooltip"
+                              title="Membership is backed by an Approved request">Explicit Membership</span>
+                            {% elif role_mem.implicit %}
+                              <span class="text-info float-right"
+                              data-toggle="tooltip"
+                              title="Membership is inferred from collected data">Implicit Membership</span>
+                            {% endif %}
+                          </p>
+                      </div>
+                      </div>
+                      {% endfor %}
+                    </div>
+
+                    <div class="tab-pane fade" id="access-breakdown" role="tabpanel" aria-labelledby="access-breakdown">
+                      {% for accdom, accdata in provisioned_access.items %}
+                        <div class="event border-bottom py-1">
+                          <p class="mb-0 mt-0 pt-0 pb-0">
+                            <span class="text-primary"><strong>
+                              {{accdom.name}}</strong>
+                            </span>
+                            <span class="text-info font-weight-medium">
+                              (account: {{accdata.account.name}})
+                            </span>
+                            <span><small class="float-right text-muted ml-2">
+                              Memberships: {{accdata.memberships.count}}</small></span>
+                          </p>
+                          <div class="align-items-center">
+                            <p class="ml-2 mb-0 p-1">
+                              {% for mem in accdata.memberships %}
+                                <span class="badge badge-light small">{{mem.access.name}}</span>
+                              {% endfor %}
+                            </p>
+                          </div>
+                        </div>
+                      {% endfor %}
+                    </div>
+
+                </div>
+              </div>
+
+          </div>
+        </div>
+
+    </div>
+
+    <div class="row">
+        <div class="col-12 grid-margin">
+          <div class="card">
+            <div class="card-body">
+              <h4 class="card-title">Last 5 API Tasks</h4>
+              <div class="table-responsive">
+                <table class="table table-bordered">
+                  <thead>
+                    <tr>
+                      <th>API Call</th>
+                      <th>Source Object</th>
+                      <th>Access Domain</th>
+                      <th>Status</th>
+                      <th>Last Updated</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                      {% for apitask in api_tasks %}
+
+                      <tr>
+                        <td>{{apitask.api_call}}</td>
+                        <td>{{apitask.content_object.name}}</td>
+                        <td>{{apitask.content_object.access_domain}}</td>
+                        <td>
+                            {% if apitask.tasks_successful %}
+                                <div class="badge badge-success"></div>Successful
+                            {% elif apitask.tasks_complete %}
+                                <div class="badge badge-warning"></div>Complete with Errors
+                            {% else %}
+                                <div class="badge badge-secondary"></div>Pending
+                            {% endif %}
+
+                        </td>
+                        <td>{{apitask.updated}}</td>
+                      </tr>
+
+                      {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+</div>
+{% endblock %}
+
+
+
+{% block script %}
+
+{% verbatim handle_bar_templates %}
+
+{% endverbatim handle_bar_templates %}
+
+<script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.21/js/dataTables.bootstrap4.min.js"></script>
+
+<script>
+
+    $(document).ready(function () {
+    });
+
+</script>
+{% endblock %}

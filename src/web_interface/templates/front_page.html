@@ -1,0 +1,14 @@
+{% extends 'ui_base_full.html' %}
+{% load static  %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-12">
+    <div class="mx-auto" style="text-align:center;">
+      <img src="{% static 'portunus_logo_text_2k.png' %}" class="rounded mx-auto d-block m-1" alt="Portunus" style="max-width: 50%;">
+      <a class="btn btn-primary btn-lg" role="button" href="{% url 'login' %}"><h4>Login to the Demo</h4></a>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

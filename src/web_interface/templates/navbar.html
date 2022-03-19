@@ -1,0 +1,23 @@
+{% load static socialaccount %}
+
+<nav class="navbar default-layout navbar-dark bg-dark fixed-top col-12 p-0 d-flex flex-row">
+  <div class="text-center navbar-brand-wrapper align-items-center justify-content-center">
+    <a class="navbar-brand brand-logo justify-content-center" href="/">
+      <img src="{% static 'portunus_logo_text_800600.png' %}" class="rounded mx-auto d-block m-1" alt="Portunus">
+      <span class="text-muted mt-1 font-weight-light">[LITE]</span>
+    </a>
+    <a class="navbar-brand brand-logo-mini" href="/">
+      Portunus
+    </a>
+  </div>
+
+  <div class="navbar-menu-wrapper d-flex align-items-center">
+    <div class="navbar-nav ml-auto d-none d-lg-flex">
+      {% if user.is_authenticated %}
+        <a class="btn btn-outline-info" role="button" style="margin-left:10px" href="{% url 'logout' %}">Logout ({{user}})</a>
+      {% else %}
+        <a class="btn btn-outline-info" role="button" style="margin-left:10px" href="{% url 'login' %}">Login</a>
+      {% endif %}
+    </div>
+  </div>
+</nav>

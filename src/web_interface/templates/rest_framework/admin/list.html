@@ -1,0 +1,118 @@
+{% load rest_framework %}
+<div class="table-responsive">
+
+    <div class="container h-50" id="loading_dialog">
+      <div class="row justify-content-center align-items-center">
+        <h3 class="text-info">
+            <span class="spinner-border text-info"></span>
+            Loading..
+        </h3>
+      </div>
+    </div>
+
+    <table id="api_table" class="table table-striped table-sm d-none">
+        <thead>
+            <tr>
+                {% for column in columns%}
+                    <th>{{ column|capfirst }}</th>
+                {% endfor %}
+                <th></th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for row in results %}
+            <tr>
+                {% for key, value in row|items %}
+                    {% if key in columns %}
+                    <td {{ value|add_nested_class }} >
+                        {{ value|format_value }}
+                    </td>
+                    {% endif %}
+                {% endfor %}
+                <td>
+                    {% if row.url %}
+                    <a href="{{ row.url }}" class="btn btn-xs btn-primary" aria-hidden="true"><span class="material-icons md-18">navigate_next</span></a>
+                    {% else %}
+                    <a href="#" class="btn btn-xs btn-primary disabled" aria-hidden="true"><span class="material-icons md-18">navigate_next</span></a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+
+        </tbody>
+
+        <tfoot>
+            <tr>
+                {% for column in columns%}
+                    <th>{{ column|capfirst }}</th>
+                {% endfor %}
+                <th></th>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+
+<style>
+.dataTables_filter {
+    float:right;
+}
+.dataTables_paginate {
+    float:right;
+}
+.dataTables_info {
+    float:left;
+}
+</style>
+
+<script>
+var list_api_table;
+
+function make_datatable(){
+    if (list_api_table != null){
+        console.log("Table already created.. this shouldn't get called > once.");
+        return;
+    }
+
+    $('#api_table tfoot th').each( function () {
+        var title = $(this).text();
+        if (title.length > 0){
+            $(this).html( '<input class="form-control" type="text" placeholder="Search '+title+'" />' );
+        }
+    } );
+
+   list_api_table = $('#api_table').DataTable({
+
+        dom: "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6 pull-right'f>>" +
+            "<'row'<'col-sm-12'tr>>" +
+            "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+        // https://datatables.net/reference/option/dom
+        buttons: [
+            'copy', 'excel', 'pdf', 'pageLength'
+        ],
+        lengthMenu: [
+            [ 10, 25, 50, -1 ],
+            [ '10 rows', '25 rows', '50 rows', 'Show all' ]
+        ],
+        responsive: true,
+        order: [], // Default order is the first collumn, this changes it to nothing, so our own ordering of querysets is used
+        "initComplete": function(settings, json) {
+            $('#loading_dialog').hide();
+            $('#api_table').removeClass('d-none');
+        }
+    });
+
+    // Apply the search
+    list_api_table.columns().every( function () {
+        var that = this;
+
+        $( 'input', this.footer() ).on( 'keyup change', function () {
+            if ( that.search() !== this.value ) {
+                that
+                    .search( this.value, true )
+                    .draw();
+            }
+        } );
+    } );
+}
+</script>

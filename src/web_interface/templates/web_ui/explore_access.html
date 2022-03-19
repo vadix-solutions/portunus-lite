@@ -1,0 +1,161 @@
+{% extends "web_ui/acm_base.html" %}
+{% load i18n staticfiles %}
+
+{% block head_extra %}
+<link rel="stylesheet" href="{% static 'vdx_id/css/home.css' %}">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/dataTables.bootstrap4.min.css">
+
+{% endblock %}
+
+{% block content %}
+<div class="flex-grow-1 h-100">
+
+    <div class="row p-2 header-top">
+        <div class="col-10">
+            <h4 class="text-primary">Explore Access Roles
+                <small class="text-muted">Access Roles are logical collections of Access Items that can be requested by a User</small>
+            </h4>
+        </div>
+        <div class="col-2">
+            <a class="btn btn-success btn-block" href="{% url 'web:create_access_role' %}">
+                Create new Role</a>
+        </div>
+    </div>
+
+    <div class="card card-rounded">
+        <div class="row card-body">
+            <div class="col-lg-6 col-xl-4">
+                <h6 class="text-info">Access Role Info</h6>
+                <div id="role-info"></div>
+            </div>
+            <div class="col-lg-6 col-xl-8">
+                <h6 class="text-info">Access Graph View</h6>
+                {% include "web_ui/access_graph.html" %}
+            </div>
+        </div>
+    </div>
+
+    <div class="row-fluid pt-3">
+        <div class="access-body flex-grow-1 h-100">
+            <div class="col-12">
+                <table id="role_table" class="table table-hover table-sm">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>{% trans "Access Role" %}</th>
+                            <th>{% trans "Access Domain" %}</th>
+                            <th>{% trans "Include Roles" %}</th>
+                            <th>{% trans "Include Items" %}</th>
+                            <th>{% trans "Actions" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for role in access_roles %}
+                        <tr data-pk="{{role.pk}}" data-role="{{role.name}}">
+                            <td class='text-primary'><strong>{{role.name}}</strong></td>
+                            <td>{{role.access_domain}}</td>
+                            <td>{% for ir in role.access_roles.all %} <span class="badge badge-light">{{ir}}</span>{% endfor %}</td>
+                            <td>{% for ii in role.access_items.all %} <span class="badge badge-light">{{ii.name}}</span>{% endfor %}</td>
+                            <td>
+                                {% if role.requestable %}
+                                    <a class="btn btn-primary role_request"
+                                        data-role_name="{{role.name}}" data-role_pk="{{role.pk}}">
+                                        Request</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+
+{% block script %}
+
+<script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.21/js/dataTables.bootstrap4.min.js"></script>
+
+<script>
+    var role_table;
+
+    $(document).ready(function () {
+        create_role_table();
+    });
+
+    $("a.role_request").on("click", function(){
+        var role_id = $(this).data('role_pk');
+        var user_id = '{{ request.user.pk }}';
+        var role_name = $(this).data('role_name');
+        var user_name = '{{ request.user.username }}';
+
+
+        $.ajax({
+            url: "{% url 'api:id_rbac:role_membership_request-list' %}",
+            data: {
+                'role': role_id,
+                'user': user_id,
+                'format': 'json'
+            },
+            type: 'GET',
+            success: function(response) {
+                if (response.length > 0){
+                    window.location.replace(
+                        response[0]['url'].replace('format=json', ""));
+                } else {
+                    $.ajax({
+                        url: "{% url 'api:id_rbac:role_membership_request-list' %}",
+                        data: {
+                            'notes': 'Requested via Demo interface',
+                            'role': role_name,
+                            'user': '{{ request.user.username }}',
+                            'csrfmiddlewaretoken': '{{ csrf_token }}'
+                        },
+                        type: 'POST',
+                        success: function(response) {
+                            window.location.replace(response['url']);
+                        }
+                    });
+                }
+            }
+        });
+
+
+    });
+
+    function create_role_table() {
+        console.log("Setting up hover")
+        $('#role_table tbody>tr').on('mouseenter', function () {
+            var role_id = $(this).data('pk');
+            var role_name = $(this).data('role');
+            cy.elements('node[label = "' + role_name + '"]').addClass('selected');
+
+            $.ajax({
+                url: "/explore_access/role_info/" + role_id,
+                type: 'GET',
+                success: function(html_data){
+                    $('#role-info').html(html_data);
+                }
+            });
+        });
+        $('#role_table tbody>tr').on('mouseleave', function () {
+            var role_id = $(this).data('role');
+            cy.elements('node[label = "' + role_id + '"]').removeClass('selected');
+        });
+
+        role_table = $('#role_table').DataTable({
+            "autoWidth": false,
+            "pageLength": 10,
+            "order": [
+                [0, "desc"],
+                [1, "desc"]
+            ],
+            "responsive": true,
+        });
+    }
+
+</script>
+{% endblock %}

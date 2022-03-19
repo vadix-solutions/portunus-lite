@@ -1,0 +1,55 @@
+/* https://coolbackgrounds.io/ */
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.background {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 150%;
+    height: 150%;
+    z-index: -1;
+
+    /* Full height */
+    height: 100%;
+}
+
+.navbar .collapse {
+    visibility: hidden;
+    display: block;
+}
+
+.navbar .collapse.show {
+    visibility: visible;
+}
+
+@media (max-width: 767px) {
+    .navbar-nav .nav-link.active {
+        visibility: visible;
+    }
+
+    .collapsing {
+        transition: all 0.35s ease;
+        height: 40px !important;
+    }
+
+    .collapse:not(.show) .navbar-nav .nav-item:not(.active) {
+        display: none;
+    }
+}
+
+@media (min-width: 768px) {
+    .navbar .collapse .navbar-nav .nav-item {
+        visibility: visible;
+    }
+}
+
+.btn-xs {
+  padding-top: 0px;
+  padding-bottom: 0px;
+}

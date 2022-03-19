@@ -1,0 +1,37 @@
+<div class="card border-secondary mt-1">
+    <div class="card-body">
+        <div class="tab-content" id="pills-tabContent">
+            <div class="tab-pane fade show active" id="pills-host-data-{{accdom.pk}}" role="tabpanel" aria-labelledby="pills-host-data-{{accdom.pk}}-tab">
+                <table class="table">
+                    <thead>
+                        <tr>
+                        <th>Address</th>
+                        <th>Active</th>
+                        <th>Writable</th>
+                        <th>Updated</th>
+                        <th>Last Collection ID</th>
+                        </tr>
+                    </thead>
+                    <tbody class="host_table">
+                        {% for host in accdom.hosts.all|dictsortreversed:"updated" %}
+                        <tr data-pk="{{host.pk}}">
+                        <td>
+                            {% if host.active %}
+                                <label class="badge badge-primary">
+                            {% else %}
+                                <label class="badge badge-outline-secondary">
+                            {% endif %}
+                            {{host.address}}
+                        </label></td>
+                        <td>{{host.active}}</td>
+                        <td>{{host.writable}}</td>
+                        <td>{{host.updated}}</td>
+                        <td>{{host.last_collection_id}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

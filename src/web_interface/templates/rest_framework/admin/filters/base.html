@@ -1,0 +1,38 @@
+<div class="modal fade" id="filtersModal" tabindex="-1" role="dialog" aria-labelledby="filters" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Filters</h4>
+    </div>
+      <div class="modal-body">
+        {% for element in elements %}
+        {% if not forloop.first %}<hr/>{% endif %}
+        {{ element }}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<style>
+#filtersModal .modal-body label {
+  width: 40%;
+}
+#filtersModal .modal-body input {
+  width: 50%;
+  height: 34px;
+  padding: 6px 12px;
+  font-size: 14px;
+  line-height: 1.42857143;
+  color: #555;
+  background-color: #fff;
+  background-image: none;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+#filtersModal .modal-body span {
+  display: none;
+}
+</style>

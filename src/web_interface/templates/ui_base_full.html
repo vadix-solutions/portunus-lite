@@ -1,0 +1,49 @@
+{% extends 'ui_base.html' %}
+
+{% block body_container %}
+
+<!-- partial -->
+<div class="main-panel">
+  <div class="content-wrapper">
+
+  <!-- Main Container -->
+  <div id="main-control" class="d-flex flex-grow-1 w-100 h-100">
+    <div class="w-100">
+    {% block content %}
+    {% endblock %}
+    </div>
+  </div>
+
+  </div>
+  <!-- content-wrapper ends -->
+
+</div>
+
+{% endblock %}
+
+{% block head_extra %}
+<style>
+  .main-panel {
+    width: 100%;
+  	min-height: calc(100vh);
+  }
+  .background {
+  	width: calc(100vw);
+  }
+</style>
+{% endblock %}
+
+{% block script %}
+<script>
+
+window.onload = function() {
+  Particles.init({
+    selector: '.background',
+    color: ['#4A04D3', '#40FBC9', '#DBEDF3'],
+    connectParticles: true,
+    responsive: true,
+  });
+};
+
+</script>
+{% endblock %}

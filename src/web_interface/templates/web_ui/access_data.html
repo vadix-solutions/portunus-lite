@@ -1,0 +1,562 @@
+{% extends "web_ui/acm_base.html" %}
+{% load i18n staticfiles %}
+
+{% block head_extra %}
+<link rel="stylesheet" href="{% static 'vdx_id/css/home.css' %}">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/dataTables.bootstrap4.min.css">
+<link rel="stylesheet" href="{% static 'jstree/themes/default/style.min.css' %}" />
+
+<style>
+    .host_table {
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="flex-grow-1 h-100">
+
+    <div class="row p-2 header-top">
+        <div class="col-12">
+            <h4 class="text-primary">Access-Domain Data
+                <small class="text-muted">Review access data ingested by Portunus</small>
+            </h4>
+        </div>
+    </div>
+
+    <div class="row-fluid">
+        {% for accdom in access_domains %}
+        <div class="container-fluid m-2 card card-rounded">
+            <div class="row card-body">
+                <div class="col-3 col-xl-2">
+                    <h5 class='text-primary'>{{accdom.name}}</h5>
+                    <ul>
+                        <li>Hosts: {{accdom.active_hosts.count}}</li>
+                        <li>Accounts: {{accdom.accounts.count}}</li>
+                        <li>Access-Items: {{accdom.access_items.count}}</li>
+                        <li>Memberships: {{accdom.access_item_memberships.count}}</li>
+                    </ul>
+                    <button class="btn btn-outline-success btn-block call_collect" data-pk="{{accdom.pk}}">
+                        Collect Data
+                    </button>
+                    <button class="btn btn-outline-primary btn-block call_scan" data-pk="{{accdom.pk}}">
+                        Scan Hosts
+                    </button>
+                    <button class="btn btn-info btn-block" type="button"
+                        data-toggle="collapse" data-target="#accdom_expand_data-{{accdom.pk}}"
+                        aria-expanded="false" aria-controls="accdom_expand_data">
+                        Toggle Data View
+                      </button>
+                </div>
+                <div class="col-9 col-xl-10">
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="data-{{accdom.pk}}" role="tabpanel" aria-labelledby="data-{{accdom.pk}}-tab">
+                            <div class="access_chart" data-pk="{{accdom.pk}}">
+                                <div class="d-sm-flex justify-content-between align-items-start">
+                                    <div class="data-legend"></div>
+                                </div>
+                                <div class="chartjs-wrapper m-0">
+                                    <canvas id="access-chart-{{accdom.pk}}"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="collapse" id="accdom_expand_data-{{accdom.pk}}">
+                        {% include "web_ui/access_data_expanded.html" %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="modal fade" id="host_modal" tabindex="-1" aria-labelledby="host_modal_label" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="host_modal_label">Host Data</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+        <div class="modal-body">
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+</div>
+
+<div class="modal fade" id="accobj_modal" tabindex="-1" aria-labelledby="accobj_modal_label" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="accobj_modal_label">Access Object Data</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+        <div class="modal-body">
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block nonbody %}
+
+  {% verbatim handle_bar_templates %}
+
+
+  <script type="text/x-handlebars-template" id="host-modal-template">
+    <h5>Address: <strong class="text-primary">{{address}}</strong></h5>
+    <h5>Last Collection ID: <strong class="text-primary">{{last_collection_id}}</strong></h5>
+    <hr/>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12 col-lg-6">
+                <h6>Latest Collection Data</h6>
+                <div class="form-group row">
+                    <label for="search-input" class="col-sm-2 col-form-label">Search:</label>
+                    <div class="col-sm-10">
+                        <input id="search-input" class="search-input form-control" />
+                    </div>
+                </div>
+                <div class="jstree_div" style="text-align: left;">
+                </div>
+            </div>
+            <div class="col-12 col-lg-6">
+                <h6>Collection Metadata</h6>
+                <div class="table-responsive">
+                    <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Collection ID</th>
+                            <th># Accounts</th>
+                            <th># Access Items</th>
+                            <th># Memberships</th>
+                        </tr>
+                    </thead>
+                    <tbody class="meta_table">
+                        {{#collection_meta}}
+                        <tr>
+                            <td>{{key}}</td>
+                            <td><span class="badge badge-pill badge-info">{{accounts}}</span></td>
+                            <td><span class="badge badge-pill badge-info">{{access_items}}</span></td>
+                            <td><span class="badge badge-pill badge-info">{{memberships}}</span></td>
+                        </tr>
+                        {{/collection_meta}}
+                    </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/x-handlebars-template" id="accobj-modal-template">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12 col-lg-6">
+                <h6>State Logs</h6>
+                <div style="max-height: 600px; overflow: auto;">
+                    {{#each state.results}}
+                        <p class="m-0">
+                            <small class="text-muted">{{timestamp}}</small>
+                            {{#if by }}
+                            <span class="badge badge-outline-secondary">{{by}}</span>
+                            {{/if}}
+                            <span class="badge badge-outline-primary float-right">{{state}}</span>
+                        </p>
+                    {{/each}}
+                </div>
+            </div>
+            <div class="col-12 col-lg-6">
+                <h6>API Tasks</h6>
+                <div style="max-height: 600px; overflow: auto;">
+                    {{#each tasks.results}}
+                        <p class="m-0">
+                            <small class="text-muted">{{created}}</small>
+                            {{#if tasks_successful }}
+                                <span class="badge badge-outline-success">{{api_call}} (success)</span>
+                            {{else}}
+                                <span class="badge badge-outline-warning">{{api_call}} (errors)</span>
+                            {{/if}}
+                        </p>
+                    {{/each}}
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+
+  {% endverbatim handle_bar_templates %}
+{% endblock %}
+
+
+{% block script %}
+
+<script src="{% static 'jstree/jstree.min.js' %}"></script>
+
+<script>
+
+    function parse_coll_to_jstree(coll_data){
+        var jstree_collection_data = []
+        for (const key in coll_data) {
+          js_obj = {"text": key, "children": []};
+          for (const ckey in coll_data[key]) {
+            child_obj = {"text": ckey, "children": []};
+            if (typeof coll_data[key][ckey] === 'object'){
+              for (const cckey in coll_data[key][ckey]) {
+                gchild_obj = {
+                  "text": `${cckey} = ${coll_data[key][ckey][cckey]}`
+                };
+                child_obj['children'].push(gchild_obj);
+              }
+            } else {
+              child_obj['children'].push(coll_data[key][ckey]);
+            }
+            js_obj['children'].push(child_obj);
+          }
+          if (js_obj['children'].length > 0){
+            jstree_collection_data.push(js_obj);
+          }
+        }
+        return jstree_collection_data;
+    }
+
+    $('.host_table tr').on('click', function(e){
+        console.log("Getting host details", e);
+        var tr = $(e.target).closest('tr');
+        var host_pk = tr.data('pk');
+
+        $('#host_modal .modal-body').html("Loading..");
+        $('#host_modal').modal({});
+
+        $.ajax({
+            url: "/access_data/host_model/" + host_pk,
+            type: 'GET',
+            success: function(host_data) {
+                var templ = Handlebars.compile($("#host-modal-template").html());
+                var populatedHtml = templ(host_data);
+                $('#host_modal .modal-body').html(populatedHtml);
+
+                var jstree_collection_data = parse_coll_to_jstree(
+                    host_data['collection_data']);
+                $('#host_modal .jstree_div').jstree({
+                    "core" : {
+                        "themes" : {},
+                        "data": jstree_collection_data
+                    },
+                    "checkbox" : {
+                        "keep_selected_style" : false
+                    },
+                    "plugins" : [ "wholerow", "search" ],
+                    "search": {
+                        "case_sensitive": false,
+                        "show_only_matches": false
+                    }
+                });
+
+                $(".search-input").keyup(function () {
+                    var searchString = $(this).val();
+                    $('#host_modal .jstree_div').jstree(
+                        'search', searchString);
+                });
+            }
+        });
+    })
+
+    $('.accessobj_table tr').on('click', function(e){
+        var tr = $(e.target).closest('tr');
+        var obj_pk = tr.data('pk');
+        var state_url = tr.data('state-url');
+        var tasks_url = tr.data('task-url');
+
+        $('#accobj_modal .modal-body').html("Loading..");
+        $('#accobj_modal').modal({});
+        var templ = Handlebars.compile($("#accobj-modal-template").html());
+
+        // Get the API Tasks
+        console.log("Getting API Tasks")
+        $.ajax({
+            url: state_url,
+            type: 'GET',
+            success: function(state_data) {
+                console.log(state_data);
+                $.ajax({
+                    url: tasks_url,
+                    type: 'GET',
+                    success: function(task_data) {
+                        console.log(task_data);
+                        var populatedHtml = templ({"state": state_data, "tasks": task_data});
+                        $('#accobj_modal .modal-body').html(populatedHtml);
+                    }
+                });
+            },
+            error: function(err){
+                console.log(err);
+                $('#accobj_modal .modal-body').html(
+                    `<span class='text-danger'>Error retrieving data!</span>
+                    <pre class="bg-secondary"><code>${err.responseText}</code></pre>`
+                );
+            }
+        });
+    })
+
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        target_cb_chrt_div = $($(e.target).attr('href')).find('.circuitbreak_chart')
+        target_acc_chrt_div = $($(e.target).attr('href')).find('.access_chart')
+        if (target_cb_chrt_div.length > 0){
+            init_cbrk_chart(0, target_cb_chrt_div)
+        }
+        if (target_acc_chrt_div.length > 0){
+            init_data_chart(0, target_acc_chrt_div)
+        }
+    })
+
+    $('button.call_collect').on('click', function(){
+        var pk = $(this).data('pk');
+        var this_chart = $(this).closest('.card').find('.access_chart');
+        var this_cb_chart = $(this).closest('.card').find('.circuitbreak_chart');
+
+        $.ajax({
+            url: "{% url 'api:id_infra:access_domain-list' %}" + pk + "/collect",
+            type: 'GET',
+            success: function(){
+                setTimeout(
+                function(){
+                    init_data_chart(0, this_chart);
+                    init_cbrk_chart(0, this_cb_chart);
+                }, 5000
+                );
+            }
+        });
+    });
+
+    $('button.call_scan').on('click', function(){
+        var pk = $(this).data('pk');
+
+        $.ajax({
+            url: "{% url 'api:id_infra:access_domain-list' %}" + pk + "/scan",
+            type: 'GET',
+            success: function(){
+            }
+        });
+    });
+
+    $('.access_chart').each(init_data_chart);
+
+    var chart_options = {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            yAxes: [{
+                gridLines: {
+                    display: true,
+                    drawBorder: false,
+                    color:"rgba(255,255,255,.05)",
+                    zeroLineColor: "rgba(255,255,255,.05)",
+                },
+                ticks: {
+                    beginAtZero: false,
+                    autoSkip: true,
+                    maxTicksLimit: 4,
+                    fontSize: 10,
+                    color:"#6B778C"
+                }
+            }],
+            xAxes: [{
+                gridLines: {
+                    display: false,
+                    drawBorder: false,
+                },
+                ticks: {
+                    beginAtZero: false,
+                    autoSkip: true,
+                    maxTicksLimit: 7,
+                    fontSize: 10,
+                    color:"#6B778C",
+                    maxRotation: 15,
+                    minRotation: 15
+                }
+            }],
+        },
+        legend:false,
+        legendCallback: function (chart) {
+            var text = [];
+            text.push('<div class="chartjs-legend"><ul>');
+            for (var i = 0; i < chart.data.datasets.length; i++) {
+                text.push('<li>');
+                text.push('<span style="background-color:' + chart.data.datasets[i].borderColor + '">' + '</span>');
+                text.push(chart.data.datasets[i].label);
+                text.push('</li>');
+            }
+            text.push('</ul></div>');
+            return text.join("");
+        },
+        elements: {
+            line: {
+                tension: 0.4,
+            }
+        },
+        tooltips: {
+            backgroundColor: 'rgba(31, 59, 179, 1)',
+        }
+    }
+
+    function init_cbrk_chart(idx, chart_div){
+        var accdom_pk = $(chart_div).data('pk');
+        var graphGradient1 = $(chart_div).find("canvas")[0].getContext('2d');
+        var graphGradient2 = $(chart_div).find("canvas")[0].getContext('2d');
+        var graphGradient3 = $(chart_div).find("canvas")[0].getContext('2d');
+        var graphGradient4 = $(chart_div).find("canvas")[0].getContext('2d');
+        // Get some backgrounds set up
+        var dataGradientBG1 = graphGradient1.createLinearGradient(5, 0, 5, 100);
+        dataGradientBG1.addColorStop(0, 'rgba(26, 115, 232, 0.18)');
+        dataGradientBG1.addColorStop(1, 'rgba(34, 36, 55, 0.5)');
+        var dataGradientBG2 = graphGradient2.createLinearGradient(10, 0, 0, 150);
+        dataGradientBG2.addColorStop(0, 'rgba(0, 208, 255, 0.19)');
+        dataGradientBG2.addColorStop(1, 'rgba(34, 36, 55, 0.4)');
+        var dataGradientBG3 = graphGradient3.createLinearGradient(5, 5, 20, 150);
+        dataGradientBG3.addColorStop(0, 'rgba(0, 108, 155, 0.19)');
+        dataGradientBG3.addColorStop(1, 'rgba(34, 255, 155, 0.4)');
+        var dataGradientBG4 = graphGradient4.createLinearGradient(0, 10, 5, 150);
+        dataGradientBG4.addColorStop(0, 'rgba(70, 28, 155, 0.19)');
+        dataGradientBG4.addColorStop(1, 'rgba(34, 255, 155, 0.4)');
+
+        $.ajax({
+            url: "/access_data/ccbrk_data/" + accdom_pk,
+            type: 'GET',
+            dataType: 'json', // added data type
+            success: function(accdom_cbrk_data) {
+                var chart_data = {
+                    labels: accdom_cbrk_data['labels'],
+                    datasets: [{
+                        label: 'Consistency(accounts)',
+                        data: accdom_cbrk_data['accounts']['consistency'],
+                        backgroundColor: dataGradientBG2,
+                        pointBackgroundColor: accdom_cbrk_data['point_color'],
+                        borderColor: '#1F3BB3',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        borderWidth: 1.5,
+                        fill: true, // 3: no fill
+                    },{
+                        label: 'Consistency(access-items)',
+                        data: accdom_cbrk_data['access_items']['consistency'],
+                        backgroundColor: dataGradientBG4,
+                        pointBackgroundColor: accdom_cbrk_data['point_color'],
+                        borderColor: '#52CDFA',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        borderWidth: 1.5,
+                        fill: true, // 3: no fill
+                    },{
+                        label: 'Changes(accounts)',
+                        data: accdom_cbrk_data['accounts']['changed'],
+                        backgroundColor: dataGradientBG1,
+                        pointBackgroundColor: accdom_cbrk_data['point_color'],
+                        borderColor: '#22F437',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        borderWidth: 1.5,
+                        fill: true, // 3: no fill
+                    },{
+                        label: 'Changes(access-items)',
+                        data: accdom_cbrk_data['access_items']['changed'],
+                        backgroundColor: dataGradientBG3,
+                        pointBackgroundColor: accdom_cbrk_data['point_color'],
+                        borderColor: '#6BD78C',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        borderWidth: 1.5,
+                        fill: true, // 3: no fill
+                    }]
+                };
+                var chart = new Chart(graphGradient1, {
+                    type: 'line',
+                    data: chart_data,
+                    options: chart_options
+                });
+                $(chart_div).find('.data-legend').html(
+                    chart.generateLegend());
+            }
+        });
+    }
+
+    function init_data_chart(idx, chart_div){
+        var accdom_pk = $(chart_div).data('pk');
+        var graphGradient1 = $(chart_div).find("canvas")[0].getContext('2d');
+        var graphGradient2 = $(chart_div).find("canvas")[0].getContext('2d');
+        var graphGradient3 = $(chart_div).find("canvas")[0].getContext('2d');
+        // Get some backgrounds set up
+        var dataGradientBG1 = graphGradient1.createLinearGradient(5, 0, 5, 150);
+        dataGradientBG1.addColorStop(0, 'rgba(26, 115, 232, 0.18)');
+        dataGradientBG1.addColorStop(1, 'rgba(34, 36, 55, 0.5)');
+        var dataGradientBG2 = graphGradient2.createLinearGradient(10, 0, 0, 150);
+        dataGradientBG2.addColorStop(0, 'rgba(0, 208, 255, 0.19)');
+        dataGradientBG2.addColorStop(1, 'rgba(34, 36, 55, 0.4)');
+        var dataGradientBG3 = graphGradient3.createLinearGradient(5, 5, 20, 150);
+        dataGradientBG3.addColorStop(0, 'rgba(0, 108, 155, 0.19)');
+        dataGradientBG3.addColorStop(1, 'rgba(34, 255, 155, 0.4)');
+
+        $.ajax({
+            url: "/access_data/chart_data/" + accdom_pk,
+            type: 'GET',
+            dataType: 'json', // added data type
+            success: function(accdom_chart_data) {
+                var chart_data = {
+                    labels: accdom_chart_data['labels'],
+                    datasets: [{
+                        label: '# Accounts',
+                        data: accdom_chart_data['accounts'],
+                        backgroundColor: dataGradientBG1,
+                        borderColor: '#1F3BB3',
+                        pointBorderWidth: 1,
+                        pointRadius: 3,
+                        borderWidth: 1.5,
+                        fill: true, // 3: no fill
+                    },{
+                        label: '# Access-Items',
+                        data: accdom_chart_data['access_items'],
+                        backgroundColor: dataGradientBG2,
+                        borderColor: '#52CDFF',
+                        pointBorderWidth: 1,
+                        pointRadius: 3,
+                        borderWidth: 1.5,
+                        fill: true, // 3: no fill
+                    },{
+                        label: '# Memberships',
+                        data: accdom_chart_data['memberships'],
+                        backgroundColor: dataGradientBG3,
+                        borderColor: '#24FD34',
+                        pointBorderWidth: 1,
+                        pointRadius: 3,
+                        borderWidth: 1.5,
+                        fill: true, // 3: no fill
+                    }]
+                };
+                var chart = new Chart(graphGradient1, {
+                    type: 'line',
+                    data: chart_data,
+                    options: chart_options
+                });
+                $(chart_div).find('.data-legend').html(
+                chart.generateLegend());
+            }
+        });
+    }
+</script>
+{% endblock %}

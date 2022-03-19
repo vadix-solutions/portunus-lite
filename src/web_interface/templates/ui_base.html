@@ -1,0 +1,284 @@
+{% load static %}
+<html>
+  <head>
+  <title>{% block title %}Vadix Portunus{% endblock %}</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
+  <!-- <link rel="stylesheet" href="{% static 'bootstrap/bootstrap.min.css' %}"> -->
+  <link rel="stylesheet" href="{% static 'vdx_id/css/vadix.css' %}">
+  <link rel="stylesheet" href="{% static 'vdx_id/css/web_ui.css' %}">
+  <!-- <link rel="stylesheet" href="{% static 'datatables/dataTables.bootstrap4.min.css' %}"> -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.10.22/css/dataTables.bootstrap4.min.css">
+
+  <link href="https://fonts.googleapis.com/css?family=Oleo+Script:400,700" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Teko:400,700" rel="stylesheet">
+
+  <!-- BootStrap Theme CSS -->
+  <link rel="stylesheet" href="{% static 'bootstrap/css/flag-icon.min.css' %}">
+  <link rel="stylesheet" href="{% static 'bootstrap/css/materialdesignicons.min.css' %}">
+  <link rel="stylesheet" href="{% static 'bootstrap/css/themify-icons.css' %}">
+  <link rel="stylesheet" href="{% static 'bootstrap/css/typicons.css' %}">
+  <link rel="stylesheet" href="{% static 'bootstrap/css/vendor.bundle.base.css' %}">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+  <!-- Base Style of Theme -->
+  <link rel="stylesheet" href="{% static 'bootstrap/css/base_style/style.css' %}">
+
+  <!-- Access Style -->
+  <link rel="stylesheet" href="{% static 'bootstrap/css/web_ui/access_style.css' %}">
+
+  <link rel="stylesheet" href="{% static 'jquery-toast/jquery.toast.min.css' %}">
+  <script src="{% static 'rest_framework/js/jquery-3.5.1.min.js' %}"></script>
+  <script>
+    function addLoadEvent(func) {
+      var oldonload = window.onload;
+      if (typeof window.onload != 'function') {
+        window.onload = func;
+      } else {
+        window.onload = function() {
+          if (oldonload) {
+            oldonload();
+          }
+          func();
+        }
+      }
+    }
+  </script>
+  {% block head_extra %}
+  {% endblock %}
+
+  </head>
+
+  <body>
+    {% block body_container %}
+
+  <div class="container-scroller">
+
+    <!-- Top Navbar -->
+    {% block navbar_container %}
+      <div class="row-fluid">
+        {% include "navbar.html" %}
+      </div>
+    {% endblock %}
+
+    <!-- partial -->
+    <div class="container-fluid page-body-wrapper">
+
+      <!-- Left Sidebar -->
+      {% block sidebar_container %}
+        <div id="sidebar-container" style="min-height: 0vh !important;" class="sidebar d-md-block flex-shrink-0">
+          <ul class="nav list-group flex-grow-1 pb-3">
+          {% include "web_ui/sidebar.html" %}
+          </ul>
+        </div>
+      {% endblock %}
+
+      <!-- partial -->
+      <div class="main-panel">
+        <div class="content-wrapper">
+
+        <!-- Main Container -->
+        <div id="main-control" class="d-flex flex-grow-1 w-100 h-100">
+          <div class="w-100">
+          {% block content %}
+          {% endblock %}
+          </div>
+        </div>
+
+        </div>
+        <!-- content-wrapper ends -->
+
+      </div>
+      <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+  </div>
+
+  {% endblock %}
+  <canvas class="background"></canvas>
+  <script type="text/javascript" src="{% static 'vdx_id/js/particles.min.js' %}"></script>
+  </body>
+
+  <div class="d-none">
+    {% block nonbody %}
+    {% endblock %}
+  </div>
+
+  {% include "web_ui/demo_modal.html" %}
+  {% verbatim handle_bar_templates %}
+    <script id="task-progress" type="text/html">
+        <div class="col-xs-1" align="center">
+            <h4>Waiting for Task: <span class="text-info">{{task_name}}</span></h4>
+            <div class="progress progress-xl">
+              <div id="task_progress" role="progressbar"
+                class="progress-bar bg-info progress-bar-striped progress-bar-animated"
+                style="width: 0%" aria-valuenow="0"
+                aria-valuemin="0" aria-valuemax="100">0% completed
+              </div>
+            </div>
+            <hr>
+            <a class="btn btn-success btn-xs btn-block"
+                href="javascript:window.location.reload(true)">Okay</a>
+        </div>
+      </script>
+
+  {% endverbatim handle_bar_templates %}
+  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+  <!-- BootStrap Theme JS -->
+  <script type="text/javascript" src="{% static 'bootstrap/js/vendor.bundle.base.js' %}"></script>
+  <script type="text/javascript" src="{% static 'notify/notify.js' %}"></script>
+  <script type="text/javascript" src="{% static 'sweetalert/sweetalert2.js' %}"></script>
+
+  <!-- Plugin js for this page -->
+  <script src="{% static 'bootstrap/js/Chart.min.js' %}"></script>
+  <script src="{% static 'bootstrap/js/jquery-jvectormap.min.js' %}"></script>
+  <script src="{% static 'bootstrap/js/jquery-jvectormap-world-mill-en.js' %}"></script>
+  <script src="{% static 'bootstrap/js/raphael-2.1.4.min.js' %}"></script>
+  <script src="{% static 'bootstrap/js/justgage.js' %}"></script>
+  <!-- End plugin js for this page -->
+  <!-- inject:js -->
+  <script src="{% static 'bootstrap/js/hoverable-collapse.js' %}"></script>
+  <script src="{% static 'bootstrap/js/misc.js' %}"></script>
+  <!-- endinject -->
+
+  <script type="text/javascript">
+    // Hide submenus
+    $('#body-row .collapse').collapse('hide');
+
+    // Collapse/Expand icon
+    $('#collapse-icon').addClass('fa-angle-double-left');
+
+    // Collapse click
+    $('[data-toggle=sidebar-colapse]').click(function() {
+      SidebarCollapse();
+    });
+
+    function SidebarCollapse () {
+      $('.menu-collapsed').toggleClass('d-none');
+      $('.sidebar-submenu').toggleClass('d-none');
+      $('.submenu-icon').toggleClass('d-none');
+      $('#sidebar-container').toggleClass('sidebar-expanded sidebar-collapsed');
+
+      // Treating d-flex/d-none on separators with title
+      var SeparatorTitle = $('.sidebar-separator-title');
+      if ( SeparatorTitle.hasClass('d-flex') ) {
+        SeparatorTitle.removeClass('d-flex');
+      } else {
+        SeparatorTitle.addClass('d-flex');
+      }
+
+      // Collapse/Expand icon
+      $('#collapse-icon').toggleClass('fa-angle-double-left fa-angle-double-right');
+    }
+  </script>
+
+  {% block script %}
+  {% endblock %}
+
+  {% block tooltip_script %}
+    <script type="text/javascript">
+      $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
+      })
+    </script>
+  {% endblock %}
+
+  <!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/reconnecting-websocket/1.0.0/reconnecting-websocket.min.js"></script> -->
+  {% block notification_sys %}
+    <script>
+      const notification_sock = new WebSocket(
+        'wss://'
+        + window.location.host
+        + '/ws/notifications/',
+      );
+
+      window.stack_contexts = {}
+
+      notification_sock.onmessage = function(ws_msg) {
+        var data = JSON.parse(ws_msg.data);
+        if (data['type'] == 'notification'){
+          ws_display_notification(data)
+        }
+        else if (data['type'] == 'task_update'){
+          ws_handle_task_update(data)
+        }
+        else if (data['type'] == 'map_update'){
+          if (ws_handle_map_update) {
+            ws_handle_map_update(data)
+          }
+        }
+      };
+
+      notification_sock.onclose = function(e) {
+        console.error('Notification socket closed unexpectedly');
+        console.error(e)
+      };
+
+      function ws_handle_task_update(data) {
+
+      }
+
+      function ws_display_notification(data) {
+        // if data.identity != "{{user.associated_identity.unique_identifier}}" { return; }
+        var bgcol = '#333'
+        switch (data.style) {
+          case 'info':
+            bgcol = '#46c35f'; break;
+          case 'success':
+            bgcol = '#f96868'; break;
+          case 'warning':
+            bgcol = '#57c7d4'; break;
+          case 'error':
+            bgcol = '#f2a654'; break;
+          case 'danger':
+            bgcol = '#f2a654'; break;
+          default:
+            bgcol = '#999'; break;
+        }
+        $.toast({
+          heading: data.heading,
+          text: data.text,
+          showHideTransition: 'slide',
+          icon: data.icon,
+          loaderBg: bgcol,
+          position: 'top-right',
+          stack: 10,
+          hideAfter: 3000
+        })
+      }
+
+    </script>
+  {% endblock %}
+
+  <!-- Templating -->
+  <script type="text/javascript" src="{% static 'handlebars/handlebars.min.js' %}"></script>
+  <script type="text/javascript" src="{% static 'jquery-toast/jquery.toast.min.js' %}"></script>
+  <script type="text/javascript" src="{% static 'jquery/jquery.cookie.js' %}"></script>
+
+
+
+  <script type="text/javascript">
+    /////////////////////////////////////////////
+    // CSRF management via cookies
+    /////////////////////////////////////////////
+    // Get the jquery.cookie library!
+    function csrfSafeMethod(method){
+      return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+
+    $(document).ready(function() {
+      $.ajaxSetup({
+        beforeSend: function(xhr, settings){
+          var csrftoken = $.cookie('csrftoken');
+          if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+          }
+        }
+      });
+
+    });
+
+  </script>
+</html>

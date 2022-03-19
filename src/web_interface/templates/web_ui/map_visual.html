@@ -1,0 +1,125 @@
+{% extends "web_ui/acm_base.html" %}
+{% load i18n staticfiles %}
+
+{% block head_extra %}
+<link rel="stylesheet" href="{% static 'jstree/themes/default/style.min.css' %}" />
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+  integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+  crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+  integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+  crossorigin=""></script>
+  <script src="{% static 'mapping/leaflet.migrationLayer.js' %}"></script>
+
+{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-grow-1 w-100 h-100">
+    <div id="map" class="d-inline-flex flex-grow-1"> </div>
+</div>
+{% endblock %}
+
+
+{% block nonbody %}
+
+{% endblock %}
+
+
+{% block script %}
+
+<script>
+
+    var lrmap = L.map('map').setView([50, 0], 4.5);
+    L.tileLayer(
+        'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+        accessToken: 'pk.eyJ1IjoiZGFudmFnZyIsImEiOiJja2oxY2kyaG00dmw5MnJxamF4eXZ1eTRvIn0.Kud2D6QlpMRJMEXAa82abQ',
+        id: 'mapbox/dark-v10',
+        tileSize: 512, zoomOffset: -1,
+    })
+    .addTo(lrmap);
+
+    var dataset = {{dataset|safe}}
+    var flow_expiries = {};
+    var flow_timeout = 3000; // ms
+    var observed_flows = [];
+
+    function ws_handle_map_update(data) {
+        Object.keys(data['flows']).forEach(function(key) {
+            flow_expiries[key] = (new Date().getTime()) + flow_timeout;
+            dataset[key] = data['flows'][key];
+        });
+        update_migration_data_if_different();
+    }
+
+    function update_migration_data_if_different(){
+        var old_flow_keys = observed_flows.slice();
+        var new_flow_data = extract_map_data();
+        if (old_flow_keys.sort().toString() != observed_flows.sort().toString()){
+            // console.log("Updating migration layer");
+            migrationLayer.setData(new_flow_data);
+        } else {
+            // console.log("Preventing redraw");
+        }
+    }
+
+    function clear_old_flows(){
+        var current_time = new Date().getTime();
+        var flows_changed = false;
+        Object.keys(flow_expiries).forEach(function(key) {
+            exp_time = flow_expiries[key];
+            if (current_time > exp_time){
+                delete flow_expiries[key];
+                delete dataset[key];
+                flows_changed = true;
+            }
+        });
+        if (Object.keys(dataset).length === 0){
+            migrationLayer.hide();
+        } else {
+            migrationLayer.show();
+        }
+        if (flows_changed){
+            update_migration_data_if_different();
+        }
+    }
+
+    setInterval(clear_old_flows, 1000);
+
+    function extract_map_data(){
+        // raw_data = Object.values(dataset).flat();
+        // Remove redundant lines to same from/to
+        var optimized_flowset = [];
+        observed_flows = [];
+
+        Object.keys(dataset).forEach(function(task_id) {
+            for (idx in dataset[task_id]){
+                var flow = dataset[task_id][idx];
+                var flow_key = `${flow.from}_${flow.to}`;
+                if (! observed_flows.includes(flow_key)){
+                    optimized_flowset.push(dataset[task_id][idx]);
+                    observed_flows.push(flow_key);
+                } else {
+                    // console.log(`Preventing redundant flow: ${flow_key}`)
+                }
+            }
+        });
+        return optimized_flowset;
+    }
+
+    var migrationLayer = new L.migrationLayer({
+        map: lrmap,
+        data: extract_map_data(),
+        pulseRadius:15,
+        pulseBorderWidth:1,
+        arcWidth:.5,
+        arcLabel:true,
+        arcLabelFont:'15px sans-serif',
+        maxWidth:10
+    });
+    migrationLayer.addTo(lrmap);
+
+
+
+</script>
+{% endblock %}

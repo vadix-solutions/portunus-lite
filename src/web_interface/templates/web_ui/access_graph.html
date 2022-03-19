@@ -1,0 +1,82 @@
+<style>
+  .graph_div {
+    height:250px;
+    background-color: #252c46;
+    box-shadow:inset 2px 5px 20px #2196f3;
+    border-radius:5px;
+  }
+  #cy {
+    height:100%;
+  }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.20.0/cytoscape.min.js"></script>
+<script src="https://cdn.rawgit.com/cpettitt/dagre/v0.7.4/dist/dagre.min.js"></script>
+<script src="https://cdn.rawgit.com/cytoscape/cytoscape.js-dagre/1.5.0/cytoscape-dagre.js"></script>
+
+<div class="graph_div">
+  <div id="cy">
+  </div>
+</div>
+
+<script>
+  var cy;
+
+  function load_graph_data(data){
+    cy = cytoscape({
+      // very commonly used options
+      container: $('#cy'),
+      elements: data.elements,
+      layout: {
+        name: 'dagre',
+        directed: true,
+        padding: 5
+      },
+      style: [ // the stylesheet for the graph
+        {
+          selector: 'node',
+          style: {
+            'shape': 'round-rectangle',
+            'width': 'label',
+            'height': 'label',
+            'padding': '5px',
+            'text-valign': 'center',
+            'background-color': '#eee',
+            'label': 'data(id)'
+          }
+        },
+        {
+          selector: 'node.selected',
+          style: {
+            'shape': 'round-rectangle',
+            'width': 'label',
+            'height': 'label',
+            'padding': '5px',
+            'text-valign': 'center',
+            'background-color': '#2196f3',
+            'label': 'data(id)'
+          }
+        },
+        {
+          selector: 'edge',
+          style: {
+            'width': 3,
+            'line-color': '#ccc',
+            'target-arrow-color': '#ccc',
+            'target-arrow-shape': 'triangle',
+            'curve-style': 'bezier'
+          }
+        }
+      ]
+    });
+  }
+
+  addLoadEvent(function(){
+    console.log("Loading graph data")
+    $.ajax({
+      dataType: "json",
+      url: "/access_graph",
+      success: load_graph_data
+    });
+  })
+</script>

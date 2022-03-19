@@ -1,0 +1,46 @@
+# Ideas
+
+This just tracks ideas that come to mind but are not fully documented.
+
+## Actionable analysis
+
+To keep the system running smoothly, code should be able to analyze the platform.
+As a result it should be able to present a report with API calls.
+The API calls could be any valid API call for the Portunus platform.
+API calls could do anything from associate an Account to a User, or add/remove memberships.
+The report should be reviewed by Operators and actioned if given appropriate permissions.
+
+### Account Inference
+
+This would analyze the Accounts collected by AccessDomains, and infer the User that would own them by inspecting the AccessDefinitions.
+It can then suggest 'Associate-account' API calls in a report.
+
+## Access Sync
+
+We should be able to record the analysis performed for each user when their access is being synchronized. This should include missing item memberships and accounts for example.
+
+## Simulation
+
+For sensitive environments, maybe we can simulate the actions that the platform would perform for a User. So in production systems that are hard to replicate, we can create a SimulatedUser where actions are only performed in a dry-run type mode.
+
+### Interface deployment
+
+Allow users to submit interfaces into the platform.
+Separate sandboxed worker is then used to parse and extract the API information.
+An MD5-sum is calculated and used to ensure there is no divergence in the source code.
+Agents will report the live MD5-sum of interfaces (conditions undetermined - startup?) and these will be compared to platform records.
+If there is a divergence, then the interface can be redeployed, or an error can be raised.
+
+# TODO:
+
+Mark out of sync when remove membership
+
+Fix order of deprovision
+
+collections freeze if bad tasks are dead
+
+
+cannot remove the primary group of user 'U_admin'
+    Tried to reconcile a deprovisioned primary group - after recreating the account
+
+New anomoly membership not removed in reconcile - needs existing record

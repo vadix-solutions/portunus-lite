@@ -1,0 +1,9 @@
+{% load rest_framework %}
+<dl class="row">
+  {% for key, value in results|items %}
+    {% if key in details %}
+      <dt class="col-sm-3"><span class="text-primary">{{ key|capfirst }}</span></dt>
+      <dd class="col-sm-9">{{ value|format_value }}</dd>
+    {% endif %}
+  {% endfor %}
+</dl>

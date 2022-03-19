@@ -1,0 +1,125 @@
+<style>
+    .embed-responsive-item {
+        width: 99% !important;
+    }
+</style>
+
+<div class="modal fade" id="demo_guide_modal" role="dialog" aria-labelledby="Demo Guide Modal" aria-hidden="true">
+    <div class="modal-dialog" style="max-width: 50%; height: 90%;">
+      <div class="modal-content" style="height: auto;">
+        <div class="modal-header">
+          <h5 class="modal-title">Portunus Demo Guide</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+
+            <ul class="nav nav-pills mb-1" id="help-tab" role="tablist">
+                <li class="pr-2"><strong>Help Topics:</strong></li>
+                <li class="nav-item">
+                    <a class="nav-link text-light active" id="demo-help-introduction-tab" data-toggle="tab" href="#demo-help-introduction"
+                    role="tab" aria-controls="demo-help-introduction" aria-selected="false">Introduction</a>
+                </li>
+                <li class="nav-item ">
+                    <a class="nav-link text-light" id="demo-help-access-domain-tab"
+                    data-toggle="tab" href="#demo-help-access-domain" role="tab"
+                    aria-controls="demo-help-access-domain" aria-selected="true">Access Domains</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="demo-help-access-roles-tab" data-toggle="tab" href="#demo-help-access-roles"
+                    role="tab" aria-controls="demo-help-access-roles" aria-selected="false">Requesting Access</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="demo-help-access-roles-create-tab" data-toggle="tab" href="#demo-help-access-roles-create"
+                    role="tab" aria-controls="demo-help-access-roles-create" aria-selected="false">Creating an Access Role</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="demo-help-access-host-scan-tab" data-toggle="tab" href="#demo-help-access-host-scan"
+                    role="tab" aria-controls="demo-help-access-host-scan" aria-selected="false">Scanning Infrastructure</a>
+                </li>
+            </ul>
+            <hr/>
+            <div class="tab-content overflow-auto">
+
+                <div class="tab-pane fade show active" id="demo-help-introduction" role="tabpanel" aria-labelledby="demo-help-introduction">
+                    <div class="alert alert-success" role="alert">
+                        <h3>Welcome!</h3>
+                        We have been working on a modern IAM platform for nearly 3 years, and we hope you like our early demo!
+
+                        <ul>
+                            <li>Have a look in the <strong>Help Topics</strong> tabs above for helpful short videos.</li>
+                            <li>Also check out the built-in documentation - in particular
+                                <a href="/docs/user_guide.html" target="_ud">the User Guide</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <h6 class="text-primary">Here is a quick breakdown of what is available in the demo:</h6>
+                    <dl>
+                        <dt>Real-time Access Management</dt>
+                        <dd>Create Roles consisting of Unix Groups on real servers on AWS</dd>
+                        <dt>Real-time Activity Map</dt>
+                        <dd>We built a map because things really do happen in real-time</dd>
+                        <dt>Access Data Review</dt>
+                        <dd>Access is managed in Access-Domains, why not have a look at the charts and expand the hosts to view the raw data collected by Portunus</dd>
+                    </dl>
+                </div>
+
+                <div class="tab-pane fade" id="demo-help-access-domain" role="tabpanel" aria-labelledby="demo-help-access-domain-tab">
+                    <h6 class="text-primary">Access Domains</h6>
+                    <p>
+                        A new concept to the IAM world, Access Domains are a way of grouping a number of hosts in which access should be consistent.
+                        This is a gap we've seen in larger organisations where existing IAM solutions focus on an individual application/host which can hinder processes like DR.
+                    </p>
+                    <hr>
+                    <div class="embed-responsive embed-responsive-16by9">
+                        <iframe class="embed-responsive-item" src="https://biteable.com/watch/embed/3458522/17bc3b13f5ba3efb2cc777718bf23ab5" allowfullscreen></iframe>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="demo-help-access-roles" role="tabpanel" aria-labelledby="demo-help-access-roles">
+                    <h6 class="text-primary">Access Roles</h6>
+                    <p>
+                        Portunus leverages the concept of Access Roles to bundle Access Items together.
+                        This ensures a better experiance for the business and better governance over logical access for our application owners and managers.
+
+                        This quick animation will demonstrate how you can request an Access Role.
+                    </p>
+                    <hr>
+                    <div class="embed-responsive embed-responsive-16by9">
+                        <iframe class="embed-responsive-item" src="https://biteable.com/watch/embed/3456301/f9a3d847f444a91ca77be01ba27d795e" allowfullscreen></iframe>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="demo-help-access-roles-create" role="tabpanel" aria-labelledby="demo-help-access-roles-create">
+                    <h6 class="text-primary">Creating Access Roles</h6>
+                    <p>
+                        Roles are integral to every modern day IAM implementation.
+                        Portunus enables organisations to better control logical access using Access Roles. Lets explore the basics with the creation of a Role
+                    </p>
+                    <hr>
+                    <div class="embed-responsive embed-responsive-16by9">
+                        <iframe class="embed-responsive-item" src="https://biteable.com/watch/embed/3465005/33cddf053fb533c5319cc7909afc53ca" allowfullscreen></iframe>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="demo-help-access-host-scan" role="tabpanel" aria-labelledby="demo-help-access-host-scan">
+                    <h6 class="text-primary">Scanning Access Hosts</h6>
+                    <p>
+                        Portunus handles access for infrastructure that scales and moves quickly, so we include lightning-fast infrastructure scanning.
+                    </p>
+                    <hr>
+                    <div class="embed-responsive embed-responsive-16by9">
+                        <iframe class="embed-responsive-item" src="https://biteable.com/watch/embed/3467454/3f22958378a86c2e8bcfed8ef141daa8" allowfullscreen></iframe>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+</div>

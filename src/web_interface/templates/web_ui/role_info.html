@@ -1,0 +1,29 @@
+<dl class="row">
+    <dt class="col-sm-4">Role Name</dt>
+    <dd class="col-sm-8 text-success">
+        <strong>{{role.name}}</strong>
+        <span class="pl-1">Requestable: {{role.requestable}}</span>
+    </dd>
+
+    <dt class="col-sm-4">Owner</dt>
+    <dd class="col-sm-8 text-info">
+        <em>{{role.owner}}</em>
+        <span class="pl-1">(Group {{role.group_owner}})</span>
+    </dd>
+
+    <dt class="col-sm-4">Description</dt>
+    <dd class="col-sm-8 text-info"><em>{{role.description}}</em></dd>
+
+    <dt class="col-sm-4">Policies</dt>
+    <dd class="col-sm-8">{% for ir in role.policies.all %} <span class="badge badge-warning">{{ir.name}}</span>{% endfor %}</dd>
+
+    <dt class="col-sm-4">Members</dt>
+    <dd class="col-sm-8">{% for mem in role.members.all %} <span class="badge badge-info">{{mem.username}}</span>{% endfor %}</dd>
+
+    <dt class="col-sm-4">Access Roles</dt>
+    <dd class="col-sm-8">{% for acc in role.access_roles.all %} <span class="badge badge-primary">{{acc.name}}</span>{% endfor %}</dd>
+
+    <dt class="col-sm-4">Access Items</dt>
+    <dd class="col-sm-8">{% for acc in role.access_items.all %} <span class="badge badge-outline-primary">{{acc.name}}</span>{% endfor %}</dd>
+
+</dl>

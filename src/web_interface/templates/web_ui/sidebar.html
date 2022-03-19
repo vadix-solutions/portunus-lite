@@ -1,0 +1,145 @@
+{% load socialaccount %}
+
+<!-- Top Navbar -> Left Sidebar :) -->
+<li class="nav-item px-3 mt-3">
+  <button type="button" class="btn btn-success w-100" data-toggle="modal" data-target="#demo_guide_modal">
+    Demo Guide
+  </button>
+</li>
+{% if user.is_authenticated %}
+    {% if user.is_staff %}
+    <li class="nav-item px-3 mt-3">
+      <a class="btn btn-outline-warning w-100 " role="button" target="_admin" href="/admin">Administration</a>
+    </li>
+    {% endif %}
+{% endif %}
+<li class="nav-item px-3 mt-3">
+  <a class="btn btn-outline-primary w-100 " role="button" target="_docs" href="/docs/">User Docs</a>
+</li>
+<li class="nav-item px-3 mt-3">
+  <a class="btn btn-outline-info w-100 " role="button" target="_api" href="/docs_api">REST API Docs</a>
+</li>
+
+<li class="nav-item nav-category">Demo</li>
+
+<li class="nav-item">
+  <a class="nav-link" href="{% url 'web:map_visual' %}">
+    <i class="menu-icon typcn typcn-mail"></i>
+    <span class="menu-title">Real-time Activity Map</span>
+  </a>
+</li>
+{% if user.is_authenticated %}
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'web:dashboard' %}">
+      <i class="menu-icon typcn typcn-mail"></i>
+      <span class="menu-title">Dashboard</span>
+    </a>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="{% url 'web:access_data' %}">
+    <i class="menu-icon typcn typcn-mail"></i>
+    <span class="menu-title">Access-Domain Data</span>
+  </a>
+</li>
+<li class="nav-item nav-category">Portunus API</li>
+
+
+<li class="nav-item">
+  <a class="nav-link" data-toggle="collapse" href="#collapse_infra" aria-expanded="false" aria-controls="collapse_infra">
+    <i class="menu-icon typcn typcn-archive"></i>
+      <span class="menu-title">Infrastructure</span>
+    <i class="menu-arrow"></i>
+  </a>
+  <div class="collapse" id="collapse_infra">
+    <ul class="nav flex-column sub-menu">
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'api:id_infra:access_domain-list' %}">Access Domains</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'api:id_infra:servergroup-list' %}">Host-Scan Definitions</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'api:id_infra:server-list' %}">Hosts</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'api:id_infra:agent-list' %}">Agents</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'api:id_infra:agent_iface-list' %}">Agent Interfaces</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'api:id_infra:agent_apitask-list' %}">Agent API Tasks</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'api:id_infra:agent_celerytask-list' %}">Agent Celery Tasks</a>
+      </li>
+
+    </ul>
+  </div>
+</li>
+
+{%endif%}
+
+
+{% if request.user.is_superuser %}
+  <li class="nav-item nav-category">SECURITY</li>
+  <li class="nav-item">
+    <a class="nav-link" target="_vault" href="http://localhost:8200/ui/">
+      <i class="menu-icon typcn typcn-mail"></i>
+      <span class="menu-title">Credential Vault</span>
+    </a>
+  </li>
+
+  <li class="nav-item nav-category">REPORTING</li>
+  <li class="nav-item">
+    <a class="nav-link" href="{% url 'web:report_builder' %}">
+      <i class="menu-icon typcn typcn-mail"></i>
+      <span class="menu-title">Report Builder</span>
+    </a>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link" href="{% url 'web:sql_explorer' %}">
+      <i class="menu-icon typcn typcn-mail"></i>
+      <span class="menu-title">Data Exploration</span>
+    </a>
+  </li>
+{% endif %}
+
+{% if request.user.is_superuser %}
+  <li class="nav-item nav-category">MONITORING</li>
+  <li class="nav-item">
+    <a class="nav-link" href="{% url 'web:flower' %}">
+      <i class="menu-icon typcn typcn-mail"></i>
+      <span class="menu-title">Task Monitoring</span>
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" target="_" href="http://localhost:8001/">
+      <i class="menu-icon typcn typcn-mail"></i>
+      <span class="menu-title">Object Datastore Monitor</span>
+    </a>
+  </li>
+{% endif %}
+
+
+{% if user.is_authenticated %}
+    <li class="nav-item px-3 mt-2 d-block d-lg-none">
+      <a class="btn btn-outline-info w-100" role="button" href="{% url 'logout' %}">Logout ({{user}})</a>
+    </li>
+{% else %}
+    <li class="nav-item px-3 mt-2 d-block d-lg-none">
+      <a class="btn btn-outline-primary w-100" role="button" href="{% provider_login_url 'google' %}">Google Login</a>
+    </li>
+    <li class="nav-item px-3 mt-2 d-block d-lg-none">
+      <a class="btn btn-outline-info w-100" role="button" href="{% url 'login' %}">Demo Login</a>
+    </li>
+{% endif %}
+
+<div class="alert alert-info m-2 mt-5" role="alert">
+  Copyright © 2021 Vadix Solutions Ltd. All rights reserved.
+
+  <a href="mailto:dan.vagg@vadix.io,jake.dixon@vadix.io" target="_blank"
+    class="btn btn-info btn-block">
+    Email Us</a>
+</div>

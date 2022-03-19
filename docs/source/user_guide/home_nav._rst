@@ -1,0 +1,24 @@
+Home page and Navigation
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+This section explains how to navigate Portunus
+
+Landing page
+------------
+
+Login
+-----
+
+Dashboard
+---------
+
+Real-time Activity Map
+----------------------
+
+This shows a real-time map of the flow of data between Portunus, its Agents and Servers.
+Servers are given a generated map location relative to the agent reaching them.
+Portunus and Agent geographic coordinates are configured in the Admin console.
+
+.. image:: real_time_map.png
+  :width: 600
+  :alt: Real-time activity map

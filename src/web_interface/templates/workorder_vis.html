@@ -1,0 +1,70 @@
+    <!-- <div class="col-md-12 col-lg-8">
+      <div class="card">
+        <div class="p-4 border-bottom">
+          <h4 class="card-title mb-0">Platform WorkOrders</h4>
+        </div>
+        <div class="card-body">
+          <canvas id="mixed-chart" height="100"></canvas>
+          <div class="mr-5" id="mixed-chart-legend"></div>
+        </div>
+      </div>
+    </div> -->
+<div class="card">
+    <div class="card-body">
+        <h4 class="card-title">Active Workorders</h4>
+        <div id="task_stack">
+        </div>
+    </div>
+</div>
+
+{% verbatim handle_bar_templates %}
+
+<script id="task-template" type="text/html">
+<div class="task_div" data-pk="{{pk}}">
+    <div class="d-flex justify-content-between mt-2">
+        <small>{{text}}</small>
+        <small>{{progress}}%</small>
+    </div>
+        <div class="progress progress-sm mt-2">
+            <div class="progress-bar bg-{{style}} progress-bar-animated" role="progressbar"
+                style="width: {{progress}}%" aria-valuenow="{{progress}}"
+                aria-valuemin="0" aria-valuemax="100">
+            </div>
+        </div>
+    </div>
+</div>
+</script>
+{% endverbatim handle_bar_templates %}
+
+<script>
+function handle_socket_wo_update(data){
+    var task_templ = Handlebars.compile($("#task-template").html());
+    var new_html = task_templ(data);
+
+    var existing_el = $(`.task_div[data-pk="${data.pk}"]`);
+    if (existing_el.length == 0){
+        console.log("Creating new task");
+        $("#task_stack").prepend(new_html);
+    } else {
+        console.log("Updating task");
+        existing_el.html(new_html);
+    }
+}
+
+function init_workorder_vis(){
+
+    var wo_url = "{% url 'api:id_infra:agent-list' %}";
+    Promise.all([
+        fetch(wo_url).then(resp => resp.json())
+    ]).then(prom_data => {
+        var [wo_list] = prom_data;
+        var existing_tasks = wo_list['results'].slice(
+            Math.max(wo_list['results'].length - 3, 0));
+        for (idx in existing_tasks){
+            existing_tasks[idx]['text'] = existing_tasks[idx]['api_call'];
+            handle_socket_wo_update(existing_tasks[idx]);
+        }
+    });
+}
+
+</script>

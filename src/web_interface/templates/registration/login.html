@@ -1,0 +1,94 @@
+{% extends "ui_base_full.html" %}
+{% load socialaccount %}
+{% load i18n staticfiles %}
+
+{% block title %}Portunus Login{% endblock %}
+
+{% block content %}
+
+  <div class="d-flex align-items-center auth auth-bg-1 theme-one">
+    <div class="row w-100">
+
+      <div class="col-lg-4 mx-auto">
+        <div class="auto-form-wrapper">
+          <img src="{% static 'portunus_logo_text_2k.png' %}" class="rounded mx-auto d-block m-1" alt="Portunus" style="max-width: 100%;">
+          {% if form.errors %}
+            <div class="alert alert-danger" role="alert">
+            Your username and password didn't match. Please try again.
+            </div>
+          {% endif %}
+
+          <form method="post" action="{% url 'login' %}">
+            {% csrf_token %}
+
+            <div class="alert alert-primary" role="alert">
+              Here for the demo? Login with <code>demo_user</code>/<code>demo_pass</code>
+            </div>
+
+            <div class="form-group">
+              <label class="label">Username</label>
+              <div class="input-group">
+                <input type="text" class="form-control"
+                  name="username" required id="id_username" placeholder="Username">
+                <div class="input-group-append">
+                  <span class="input-group-text">
+                    <i class="mdi mdi-check-circle-outline"></i>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="label">Password</label>
+              <div class="input-group">
+                <input type="password" name="password" placeholder="*********"
+                  required id="id_password" class="form-control">
+                <div class="input-group-append">
+                  <span class="input-group-text">
+                    <i class="mdi mdi-check-circle-outline"></i>
+                  </span>
+                </div>
+                <input type="hidden" name="next" value="{{ next }}">
+              </div>
+            </div>
+            <div class="form-group">
+              <button type="submit" name="btn" class="btn btn-primary submit-btn btn-block">Login</button>
+            </div>
+            <!-- <div class="form-group d-flex justify-content-between">
+              <a href="#" class="text-small forgot-password text-black">Forgot Password</a>
+            </div> -->
+            <div class="form-group">
+              <a class="btn btn-block g-login disabled" role="button"
+                  old_href="{% provider_login_url 'google' %}" href="#">
+                <img class="mr-3" src="{% static 'assets/images/file-icons/icon-google.svg' %}" alt="">
+                Log in via oAuth (Google)
+              </a>
+            </div>
+            <div class="text-block text-center my-3">
+              <span class="text-small font-weight-semibold">Not a member ?</span>
+              <a href="mailto:dan.vagg@vadix.io" class="text-black text-small">Contact Vadix</a>
+            </div>
+          </form>
+        </div>
+        <ul class="auth-footer">
+          <li>
+            <a href="#">Conditions</a>
+          </li>
+          <li>
+            <a href="#">Help</a>
+          </li>
+          <li>
+            <a href="#">Terms</a>
+          </li>
+        </ul>
+        <p class="footer-text text-center">copyright © 2021 Vadix Solutions Ltd. All rights reserved.</p>
+      </div>
+    </div>
+  </div>
+  <!-- content-wrapper ends -->
+
+
+{% endblock %}
+
+{% block script %}
+
+{% endblock %}

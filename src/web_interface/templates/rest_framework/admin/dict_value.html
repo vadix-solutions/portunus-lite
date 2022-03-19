@@ -1,0 +1,7 @@
+{% load rest_framework %}
+<dl class="row">
+    {% for k, v in value|items %}
+        <dt class="col-sm-3"><span class="text-primary">{{ k|format_value }}</span></dt>
+        <dd class="col-sm-9">{{ v|format_value }}</dd>
+    {% endfor %}
+</dl>

@@ -1,0 +1,6 @@
+.git
+data/
+scripts/
+security.keyFile
+vault/
+vdx_id_data/
