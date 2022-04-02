@@ -111,16 +111,6 @@ class ViAccessDomain(
         return f"/access_domains/{self.pk}/"
 
     @property
-    def reconcile_ordering(self):
-        ordering = settings.RECONCILE_ORDERING
-        if "reconcile_order" in self.properties:
-            access_domain_ordering = self.properties.get("reconcile_order")
-            assert set(access_domain_ordering) == set(ordering)
-            return access_domain_ordering
-        else:
-            return ordering
-
-    @property
     def access_domain(self):
         """Interesting workaround for arg referencing working.
         Account needs accdom.vault.pass to work
@@ -134,10 +124,6 @@ class ViAccessDomain(
     @property
     def active_hosts(self):
         return self.hosts.filter(active=True)
-
-    @property
-    def writable_hosts(self):
-        return self.hosts.filter(writable=True)
 
     def set_vault_secret_dict(self, sdict):
         return self.write_secret_dict(self.vault_path, sdict)

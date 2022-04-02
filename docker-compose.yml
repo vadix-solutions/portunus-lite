@@ -16,8 +16,8 @@ services:
     depends_on:
       - django_wsgi
     ports:
-      - "20080:80"
-      - "20443:443"
+      - "80:80"
+      - "443:443"
     volumes:
       - ./nginx:/etc/nginx/conf.d
       - ./src/staticfiles:/static
@@ -43,7 +43,7 @@ services:
     environment:
       VAULT_TOKEN: $VAULT_TOKEN
       REDIS_HOST: redis_int
-      REDIS_PORT: 16379
+      REDIS_PORT: 6379
     depends_on:
       - db
       - redis_int
@@ -60,7 +60,7 @@ services:
       - ./vdx_id_data:/data
     environment:
       REDIS_HOST: redis_int
-      REDIS_PORT: 16379
+      REDIS_PORT: 6379
     depends_on:
       - db
       - redis_int
@@ -70,7 +70,7 @@ services:
   flower:
     image: mher/flower:0.9.5
     environment:
-      - CELERY_BROKER_URL=redis://redis_int:16379/1
+      - CELERY_BROKER_URL=redis://redis_int:6379/1
       - FLOWER_PORT=8888
     ports:
       - 18888:8888
@@ -86,7 +86,7 @@ services:
       -Q platform,global,collection_read -E -n internal_worker@%h
     environment:
       REDIS_HOST: redis_int
-      REDIS_PORT: 16379
+      REDIS_PORT: 6379
       VAULT_TOKEN: $VAULT_TOKEN
     volumes:
       - ./src:/opt/vdx_id
@@ -99,7 +99,7 @@ services:
     image: vdx_identify:core
     environment:
       REDIS_HOST: redis_int
-      REDIS_PORT: 16379
+      REDIS_PORT: 6379
       LOGLEVEL: DEBUG
     command: >
       bash celery_beat.sh
@@ -114,7 +114,7 @@ services:
     image: vdx_identify:core
     environment:
       REDIS_HOST: redis_int
-      REDIS_PORT: 16379
+      REDIS_PORT: 6379
       LOGLEVEL: DEBUG
     command: >
       python3 celery_monitor.py
@@ -131,7 +131,7 @@ services:
     image: vdx_identify:agent
     environment:
       REDIS_HOST: redis_int
-      REDIS_PORT: 16379
+      REDIS_PORT: 6379
       LOGLEVEL: WARN
       AGENT_QUEUE: agent_internal
     command: >
@@ -161,7 +161,7 @@ services:
   redis_int:
     image: redis:6.0.12
     ports:
-      - 16379:16379
+      - 6379:6379
     volumes:
       - ./redis.conf:/usr/local/etc/redis/redis.conf
       - redis_int_data:/data

@@ -3,11 +3,7 @@ celeryev.pid
 .data/
 
 docs/build/
-mongo_cert/
 agent_keys/
-mongo_data_agent/
-mongo_data_identify/
-vdx_collection_data/
 src/celerybeat-schedule.db
 src/celerybeat.pid
 src/staticfiles/
